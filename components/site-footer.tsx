@@ -1,7 +1,7 @@
-import Link from "next/link"
-import { Facebook, Instagram, Twitter } from "lucide-react"
+import Link from "next/link";
+import { Facebook, Instagram, Twitter } from "lucide-react";
 
-import { Logo } from "@/components/logo"
+import { Logo } from "@/components/logo";
 
 export function SiteFooter() {
   return (
@@ -13,8 +13,9 @@ export function SiteFooter() {
               <Logo />
             </Link>
             <p className="text-sm text-muted-foreground">
-              Miracle Touch Crystals has been providing high-quality crystal bracelets since 2017, helping people find
-              balance and positive energy.
+              Miracle Touch Crystals has been providing high-quality crystal
+              bracelets since 2017, helping people find balance and positive
+              energy.
             </p>
           </div>
           <div className="grid grid-cols-1 gap-2">
@@ -49,18 +50,27 @@ export function SiteFooter() {
           </div>
           <div className="grid grid-cols-1 gap-2">
             <h3 className="text-lg font-semibold">Contact</h3>
-            <p className="text-sm">Email: info@mtcrystals.com</p>
-            <p className="text-sm">Phone: (555) 123-4567</p>
+            <p className="text-sm">Email: miracletouchcrystals@gmail.com</p>
+            <p className="text-sm">Phone: +91 88823 12076</p>
             <div className="flex gap-4 mt-2">
-              <Link href="#" className="text-muted-foreground hover:text-purple-600">
+              <Link
+                href="#"
+                className="text-muted-foreground hover:text-purple-600"
+              >
                 <Facebook className="h-5 w-5" />
                 <span className="sr-only">Facebook</span>
               </Link>
-              <Link href="#" className="text-muted-foreground hover:text-purple-600">
+              <Link
+                href="#"
+                className="text-muted-foreground hover:text-purple-600"
+              >
                 <Instagram className="h-5 w-5" />
                 <span className="sr-only">Instagram</span>
               </Link>
-              <Link href="#" className="text-muted-foreground hover:text-purple-600">
+              <Link
+                href="#"
+                className="text-muted-foreground hover:text-purple-600"
+              >
                 <Twitter className="h-5 w-5" />
                 <span className="sr-only">Twitter</span>
               </Link>
@@ -68,9 +78,10 @@ export function SiteFooter() {
           </div>
         </div>
         <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Miracle Touch Crystals. All rights reserved.
+          © {new Date().getFullYear()} Miracle Touch Crystals. All rights
+          reserved.
         </div>
       </div>
     </footer>
-  )
+  );
 }

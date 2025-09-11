@@ -1,34 +1,34 @@
-import Image from "next/image"
-import { Star } from "lucide-react"
+import Image from "next/image";
+import { Star } from "lucide-react";
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 const testimonials = [
   {
-    name: "Sarah Johnson",
-    role: "Yoga Instructor",
+    name: "Meera Joshi",
+    role: "Financial Advisor",
     content:
-      "I've been wearing my Amethyst bracelet from MT Crystals for over a year now, and I can truly feel the difference in my energy during yoga sessions. The quality is exceptional!",
-    avatar: "/placeholder.svg?height=40&width=40",
+      "Citrine Abundance bracelet liya aur kuch hi din mein do bade clients mile. Coincidence ho ya magic, I’m definitely keeping it! Shipping was quick and product quality solid hai.",
+    avatar: "/placeholder.svg?height=60&width=60",
     rating: 5,
   },
   {
-    name: "Michael Chen",
-    role: "Business Executive",
+    name: "Aditya",
+    role: "College Student",
     content:
-      "The Clear Quartz bracelet has been a game-changer for my focus at work. I was skeptical at first, but I'm now a firm believer in the power of these crystals. Miracle Touch Crystals delivers quality products.",
-    avatar: "/placeholder.svg?height=40&width=40",
+      "As a student, exam stress is constant. Tiger Eye bracelet really helps me stay confident and focused during my studies. Affordable bhi hai aur quality bhi superb nikli.",
+    avatar: "/placeholder.svg?height=60&width=60",
     rating: 5,
   },
   {
-    name: "Emily Rodriguez",
-    role: "Therapist",
+    name: "Ritika Mehra",
+    role: "Fitness Trainer",
     content:
-      "I recommend MT Crystals to many of my clients seeking additional support for emotional healing. The Rose Quartz bracelet in particular has received wonderful feedback. Great customer service too!",
-    avatar: "/placeholder.svg?height=40&width=40",
-    rating: 5,
+      "I received a Green Aventurine bracelet as a gift. Since then, I’ve genuinely felt more positivity and luck in my workouts and daily life. The stone feels powerful, though delivery was a little late.",
+    avatar: "/placeholder.svg?height=60&width=60",
+    rating: 4,
   },
-]
+];
 
 export default function Testimonials() {
   return (
@@ -36,9 +36,12 @@ export default function Testimonials() {
       <div className="container px-4 md:px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <div className="space-y-2">
-            <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">What Our Customers Say</h2>
+            <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
+              What Our Customers Say
+            </h2>
             <p className="max-w-[700px] text-gray-500 md:text-xl">
-              Don't just take our word for it - hear from those who have experienced the power of our crystal bracelets.
+              Don't just take our word for it - hear from those who have
+              experienced the power of our crystal bracelets.
             </p>
           </div>
         </div>
@@ -63,7 +66,10 @@ export default function Testimonials() {
                   {Array(testimonial.rating)
                     .fill(0)
                     .map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <Star
+                        key={i}
+                        className="w-4 h-4 fill-yellow-400 text-yellow-400"
+                      />
                     ))}
                 </div>
               </CardHeader>
@@ -75,5 +81,5 @@ export default function Testimonials() {
         </div>
       </div>
     </section>
-  )
+  );
 }

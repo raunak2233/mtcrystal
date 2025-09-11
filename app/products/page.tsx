@@ -1,94 +1,59 @@
-import Image from "next/image"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
-const products = [
-  {
-    id: 1,
-    name: "Amethyst Harmony",
-    description: "Promotes calm and balance, perfect for stress relief and meditation.",
-    price: "$29.99",
-    image: "/placeholder.svg?height=200&width=200",
-    category: "Emotional Healing",
-  },
-  {
-    id: 2,
-    name: "Rose Quartz Love",
-    description: "Opens the heart chakra and attracts love and compassion.",
-    price: "$32.99",
-    image: "/placeholder.svg?height=200&width=200",
-    category: "Love & Relationships",
-  },
-  {
-    id: 3,
-    name: "Clear Quartz Clarity",
-    description: "Amplifies energy and thought, bringing mental clarity and focus.",
-    price: "$27.99",
-    image: "/placeholder.svg?height=200&width=200",
-    category: "Mental Clarity",
-  },
-  {
-    id: 4,
-    name: "Black Tourmaline Protection",
-    description: "Creates a protective shield against negative energies and electromagnetic radiation.",
-    price: "$34.99",
-    image: "/placeholder.svg?height=200&width=200",
-    category: "Protection",
-  },
-  {
-    id: 5,
-    name: "Citrine Abundance",
-    description: "Attracts wealth, prosperity, and success in business ventures.",
-    price: "$31.99",
-    image: "/placeholder.svg?height=200&width=200",
-    category: "Prosperity",
-  },
-  {
-    id: 6,
-    name: "Lapis Lazuli Wisdom",
-    description: "Enhances intellectual ability, truth-seeking, and self-awareness.",
-    price: "$36.99",
-    image: "/placeholder.svg?height=200&width=200",
-    category: "Wisdom & Truth",
-  },
-  {
-    id: 7,
-    name: "Green Aventurine Luck",
-    description: "Known as the 'Stone of Opportunity,' bringing good luck and fortune.",
-    price: "$29.99",
-    image: "/placeholder.svg?height=200&width=200",
-    category: "Luck & Opportunity",
-  },
-  {
-    id: 8,
-    name: "Moonstone Intuition",
-    description: "Enhances intuition, promotes inner growth and strength.",
-    price: "$33.99",
-    image: "/placeholder.svg?height=200&width=200",
-    category: "Intuition",
-  },
-  {
-    id: 9,
-    name: "Tiger's Eye Confidence",
-    description: "Builds courage, confidence, and personal power.",
-    price: "$30.99",
-    image: "/placeholder.svg?height=200&width=200",
-    category: "Confidence",
-  },
-]
+// Import products data
+import productsData from "@/lib/products.json";
+
+type Product = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  category: string;
+  bulletPoints: string[];
+  shortDesc: string;
+};
 
 export default function ProductsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  useEffect(() => {
+    setProducts(productsData as Product[]);
+  }, []);
+
+  const handleBuyNow = (product: Product) => {
+    setSelectedProduct(product);
+  };
+
+  const closeModal = () => {
+    setSelectedProduct(null);
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <section className="w-full py-12 md:py-24 bg-purple-50">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
-              <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl">Our Crystal Bracelets</h1>
+              <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl">
+                Our Crystal Bracelets
+              </h1>
               <p className="max-w-[700px] text-gray-500 md:text-xl">
-                Explore our collection of handcrafted crystal bracelets, each designed to bring specific energies into
-                your life.
+                Explore our collection of handcrafted crystal bracelets, each
+                designed to bring specific energies into your life.
               </p>
             </div>
           </div>
@@ -119,16 +84,70 @@ export default function ProductsPage() {
                   </div>
                   <CardTitle className="mb-2">{product.name}</CardTitle>
                   <p className="text-sm text-gray-500">{product.description}</p>
-                  <p className="mt-4 font-bold text-lg">{product.price}</p>
+                  <p className="mt-4 font-bold text-lg">₹{product.price}</p>
                 </CardContent>
                 <CardFooter className="p-6 pt-0">
-                  <Button className="w-full bg-purple-600 hover:bg-purple-700">Add to Cart</Button>
+                  <Button
+                    className="w-full bg-purple-600 hover:bg-purple-700"
+                    onClick={() => handleBuyNow(product)}
+                  >
+                    Buy Now
+                  </Button>
                 </CardFooter>
               </Card>
             ))}
           </div>
         </div>
       </section>
+
+      {/* Modal */}
+      {selectedProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6 relative">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+              onClick={closeModal}
+            >
+              ×
+            </button>
+            <div className="flex flex-col items-center">
+              <Image
+                src={selectedProduct.image || "/placeholder.svg"}
+                alt={selectedProduct.name}
+                width={180}
+                height={180}
+                className="object-cover mb-4"
+              />
+              <h2 className="text-2xl font-bold mb-2">
+                {selectedProduct.name}
+              </h2>
+              <span className="inline-block px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800 mb-2">
+                {selectedProduct.category}
+              </span>
+              <p className="text-sm text-gray-500 mb-2">
+                {selectedProduct.shortDesc}
+              </p>
+              <ul className="list-disc pl-5 mb-4 text-gray-700 text-sm">
+                {selectedProduct.bulletPoints.map((point, idx) => (
+                  <li key={idx}>{point}</li>
+                ))}
+              </ul>
+              <p className="font-bold text-lg mb-4">₹{selectedProduct.price}</p>
+              <Link
+                href={`https://api.whatsapp.com/send?phone=919999492068&text=Hey!%20I%20would%20like%20to%20make%20a%20purchase%20of%20${encodeURIComponent(
+                  selectedProduct.name
+                )}.`}
+                target="_blank"
+                className="w-full"
+              >
+                <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                  Proceed to WhatsApp
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-  )
+  );
 }

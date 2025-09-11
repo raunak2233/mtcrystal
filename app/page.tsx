@@ -1,11 +1,11 @@
-import Link from "next/link"
-import Image from "next/image"
-import { ArrowRight } from "lucide-react"
+import Link from "next/link";
+import Image from "next/image";
+import { ArrowRight } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import Testimonials from "@/components/testimonials"
-import BenefitsSection from "@/components/benefits-section"
-import FeaturedProducts from "@/components/featured-products"
+import { Button } from "@/components/ui/button";
+import Testimonials from "@/components/testimonials";
+import BenefitsSection from "@/components/benefits-section";
+import FeaturedProducts from "@/components/featured-products";
 
 export default function Home() {
   return (
@@ -20,7 +20,8 @@ export default function Home() {
                   Discover the Healing Power of Crystal Bracelets
                 </h1>
                 <p className="max-w-[600px] text-gray-500 md:text-xl">
-                  Handcrafted crystal bracelets designed to bring balance, harmony, and positive energy into your life.
+                  Handcrafted crystal bracelets designed to bring balance,
+                  harmony, and positive energy into your life.
                 </p>
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
@@ -37,7 +38,7 @@ export default function Home() {
             </div>
             <div className="flex justify-center">
               <Image
-                src="/placeholder.svg?height=400&width=400"
+                src="/images/image1.png"
                 alt="Crystal Bracelets Collection"
                 width={400}
                 height={400}
@@ -63,17 +64,22 @@ export default function Home() {
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Find Your Perfect Crystal Match</h2>
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
+                Find Your Perfect Crystal Match
+              </h2>
               <p className="max-w-[600px] text-gray-500 md:text-xl">
-                Discover the crystal bracelet that resonates with your energy and intentions.
+                Discover the crystal bracelet that resonates with your energy
+                and intentions.
               </p>
             </div>
             <Link href="/products">
-              <Button className="bg-purple-600 hover:bg-purple-700">Explore Our Collection</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700">
+                Explore Our Collection
+              </Button>
             </Link>
           </div>
         </div>
       </section>
     </div>
-  )
+  );
 }

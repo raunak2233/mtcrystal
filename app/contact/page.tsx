@@ -1,16 +1,23 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
+import { useRef } from "react";
+import emailjs from "emailjs-com";
+import { useState } from "react";
+import { Mail, MapPin, Phone } from "lucide-react";
 
-import { useState } from "react"
-import { Mail, MapPin, Phone } from "lucide-react"
-
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { toast } from "@/hooks/use-toast"
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/hooks/use-toast";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -18,28 +25,53 @@ export default function ContactPage() {
     email: "",
     subject: "",
     message: "",
-  })
+  });
+  const formRef = useRef<HTMLFormElement>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // In a real application, you would send this data to your server
-    console.log(formData)
-    toast({
-      title: "Message Sent",
-      description: "Thank you for contacting us. We'll get back to you soon!",
-    })
-    setFormData({
-      name: "",
-      email: "",
-      subject: "",
-      message: "",
-    })
-  }
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!formRef.current) return;
+
+    emailjs
+      .sendForm(
+        "service_hmu5yn7",
+        "template_60t9owd",
+        formRef.current,
+        "2CifoUy79CalgD-En"
+      )
+      .then(
+        (result) => {
+          console.log("Success:", result.text);
+          toast({
+            title: "Message Sent",
+            description:
+              "Thank you for contacting us. We'll get back to you soon!",
+          });
+          setFormData({
+            name: "",
+            email: "",
+            subject: "",
+            message: "",
+          });
+        },
+        (error) => {
+          console.error("Error:", error.text);
+          toast({
+            title: "Error",
+            description: "Failed to send message. Please try again later.",
+            variant: "destructive",
+          });
+        }
+      );
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -47,9 +79,12 @@ export default function ContactPage() {
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
-              <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl">Contact Us</h1>
+              <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl">
+                Contact Us
+              </h1>
               <p className="max-w-[700px] text-gray-500 md:text-xl">
-                Have questions or need assistance? We're here to help you find the perfect crystal bracelet.
+                Have questions or need assistance? We're here to help you find
+                the perfect crystal bracelet.
               </p>
             </div>
           </div>
@@ -62,8 +97,9 @@ export default function ContactPage() {
             <div className="space-y-6">
               <h2 className="text-2xl font-bold">Get in Touch</h2>
               <p className="text-gray-500">
-                We'd love to hear from you! Whether you have questions about our products, need help choosing the right
-                crystal, or want to share your experience, please don't hesitate to reach out.
+                We'd love to hear from you! Whether you have questions about our
+                products, need help choosing the right crystal, or want to share
+                your experience, please don't hesitate to reach out.
               </p>
 
               <div className="grid gap-6">
@@ -76,8 +112,11 @@ export default function ContactPage() {
                   </CardHeader>
                   <CardContent>
                     <CardDescription>
-                      <a href="mailto:info@mtcrystals.com" className="hover:underline">
-                        info@mtcrystals.com
+                      <a
+                        href="mailto:miracletouchcrystals@gmail.com"
+                        className="hover:underline"
+                      >
+                        miracletouchcrystals@gmail.com
                       </a>
                     </CardDescription>
                   </CardContent>
@@ -93,7 +132,7 @@ export default function ContactPage() {
                   <CardContent>
                     <CardDescription>
                       <a href="tel:+15551234567" className="hover:underline">
-                        (555) 123-4567
+                        +91 88823 12076
                       </a>
                     </CardDescription>
                   </CardContent>
@@ -108,11 +147,11 @@ export default function ContactPage() {
                   </CardHeader>
                   <CardContent>
                     <CardDescription>
-                      123 Crystal Lane
+                      94, Street No 4
                       <br />
-                      Serenity Valley, CA 90210
+                      Samaypur, North West Delhi - 110042
                       <br />
-                      United States
+                      Delhi, India
                     </CardDescription>
                   </CardContent>
                 </Card>
@@ -120,14 +159,16 @@ export default function ContactPage() {
 
               <div className="space-y-2">
                 <h3 className="text-xl font-bold">Business Hours</h3>
-                <p className="text-gray-500">Monday - Friday: 9:00 AM - 6:00 PM</p>
+                <p className="text-gray-500">
+                  Monday - Friday: 9:00 AM - 6:00 PM
+                </p>
                 <p className="text-gray-500">Saturday: 10:00 AM - 4:00 PM</p>
                 <p className="text-gray-500">Sunday: Closed</p>
               </div>
             </div>
 
             <div>
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="name">Name</Label>
                   <Input
@@ -174,7 +215,10 @@ export default function ContactPage() {
                     onChange={handleChange}
                   />
                 </div>
-                <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700">
+                <Button
+                  type="submit"
+                  className="w-full bg-purple-600 hover:bg-purple-700"
+                >
                   Send Message
                 </Button>
               </form>
@@ -183,5 +227,5 @@ export default function ContactPage() {
         </div>
       </section>
     </div>
-  )
+  );
 }

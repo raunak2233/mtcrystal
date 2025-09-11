@@ -1,74 +1,79 @@
-import Image from "next/image"
-import { Star } from "lucide-react"
+import Image from "next/image";
+import { Star } from "lucide-react";
 
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 
 const testimonials = [
   {
-    name: "Sarah Johnson",
+    name: "Aarav Sharma",
     role: "Yoga Instructor",
     content:
-      "I've been wearing my Amethyst bracelet from MT Crystals for over a year now, and I can truly feel the difference in my energy during yoga sessions. The quality is exceptional, and the customer service is outstanding. Maria took the time to help me choose the perfect bracelet for my needs.",
+      "I've been wearing the Amethyst bracelet for almost a year now. It really helps me stay calm and balanced during my yoga practice. The quality is amazing and the team guided me patiently while choosing.",
     avatar: "/placeholder.svg?height=60&width=60",
     rating: 5,
   },
   {
-    name: "Michael Chen",
-    role: "Business Executive",
+    name: "Neha Gupta",
+    role: "Corporate Professional",
     content:
-      "The Clear Quartz bracelet has been a game-changer for my focus at work. I was skeptical at first, but I'm now a firm believer in the power of these crystals. Miracle Touch Crystals delivers quality products, and their packaging is eco-friendly, which I greatly appreciate.",
+      "Clear Quartz bracelet mujhe kaam ke time focus rehne mein bahut help karta hai. Pehle socha bas fashion hoga, but ab genuinely feel hota hai difference. Packaging bhi eco-friendly thi, loved it!",
     avatar: "/placeholder.svg?height=60&width=60",
     rating: 5,
   },
   {
-    name: "Emily Rodriguez",
+    name: "Rohit Verma",
     role: "Therapist",
     content:
-      "I recommend MT Crystals to many of my clients seeking additional support for emotional healing. The Rose Quartz bracelet in particular has received wonderful feedback. Great customer service too! The team is knowledgeable and genuinely cares about helping people find the right crystal match.",
+      "I often recommend Rose Quartz bracelets to my clients for emotional healing, and the feedback has been fantastic. MT Crystals' service is warm and knowledgeable, which makes the whole experience better.",
     avatar: "/placeholder.svg?height=60&width=60",
     rating: 5,
   },
   {
-    name: "David Thompson",
+    name: "Priya Nair",
     role: "Artist",
     content:
-      "As someone who works in a creative field, I find that my Lapis Lazuli bracelet from MT Crystals helps me tap into my creativity and overcome creative blocks. The craftsmanship is beautiful, and I love the energy of the stones. Will definitely be purchasing more in the future!",
+      "Mere creative blocks kaafi kam ho gaye hain since I started wearing the Lapis Lazuli bracelet. Bracelet ka finish aur design classy hai. Definitely ordering more pieces soon!",
     avatar: "/placeholder.svg?height=60&width=60",
     rating: 5,
   },
   {
-    name: "Jennifer Lee",
-    role: "Teacher",
+    name: "Kunal Singh",
+    role: "School Teacher",
     content:
-      "I purchased the Black Tourmaline bracelet to help with protection from negative energies in my classroom, and I've noticed a significant difference in the overall atmosphere. The bracelet is comfortable to wear all day, and the elastic is strong and durable.",
+      "I purchased a Black Tourmaline bracelet to keep negativity away in my classroom. Honestly, the atmosphere feels lighter now. The band is strong, but I wish the design was a little trendier.",
     avatar: "/placeholder.svg?height=60&width=60",
     rating: 4,
   },
   {
-    name: "Robert Garcia",
+    name: "Meera Joshi",
     role: "Financial Advisor",
     content:
-      "I bought the Citrine Abundance bracelet on a whim, and within weeks of wearing it, I landed two major clients! Coincidence? Maybe, but I'm not taking it off! The quality of MT Crystals' products is evident, and their shipping was fast and secure.",
+      "Citrine Abundance bracelet liya aur kuch hi din mein do bade clients mile. Coincidence ho ya magic, I’m definitely keeping it! Shipping was quick and product quality solid hai.",
     avatar: "/placeholder.svg?height=60&width=60",
     rating: 5,
   },
   {
-    name: "Olivia Wilson",
-    role: "Student",
+    name: "Aditya",
+    role: "College Student",
     content:
-      "As a college student dealing with exam stress, my Tiger's Eye bracelet has been a constant companion. It helps me stay focused and confident during exams. The price point is perfect for students, and the quality exceeds expectations. Thank you, MT Crystals!",
+      "As a student, exam stress is constant. Tiger Eye bracelet really helps me stay confident and focused during my studies. Affordable bhi hai aur quality bhi superb nikli.",
     avatar: "/placeholder.svg?height=60&width=60",
     rating: 5,
   },
   {
-    name: "James Miller",
+    name: "Ritika Mehra",
     role: "Fitness Trainer",
     content:
-      "I was gifted a Green Aventurine bracelet from MT Crystals, and I've had nothing but good luck since wearing it! The craftsmanship is excellent, and the energy of the stone is palpable. I've since purchased several more as gifts for friends and family.",
+      "I received a Green Aventurine bracelet as a gift. Since then, I’ve genuinely felt more positivity and luck in my workouts and daily life. The stone feels powerful, though delivery was a little late.",
     avatar: "/placeholder.svg?height=60&width=60",
-    rating: 5,
+    rating: 4,
   },
-]
+];
 
 export default function TestimonialsPage() {
   return (
@@ -77,9 +82,12 @@ export default function TestimonialsPage() {
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
-              <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl">Customer Testimonials</h1>
+              <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl">
+                Customer Testimonials
+              </h1>
               <p className="max-w-[700px] text-gray-500 md:text-xl">
-                Read what our customers have to say about their experiences with MT Crystals.
+                Read what our customers have to say about their experiences with
+                MT Crystals.
               </p>
             </div>
           </div>
@@ -102,14 +110,19 @@ export default function TestimonialsPage() {
                     />
                     <div>
                       <h3 className="font-medium">{testimonial.name}</h3>
-                      <p className="text-sm text-gray-500">{testimonial.role}</p>
+                      <p className="text-sm text-gray-500">
+                        {testimonial.role}
+                      </p>
                     </div>
                   </div>
                   <div className="flex mt-2">
                     {Array(testimonial.rating)
                       .fill(0)
                       .map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        <Star
+                          key={i}
+                          className="w-4 h-4 fill-yellow-400 text-yellow-400"
+                        />
                       ))}
                     {Array(5 - testimonial.rating)
                       .fill(0)
@@ -121,12 +134,14 @@ export default function TestimonialsPage() {
                 <CardContent>
                   <p className="text-gray-600">"{testimonial.content}"</p>
                 </CardContent>
-                <CardFooter className="text-sm text-gray-500">Verified Purchase</CardFooter>
+                <CardFooter className="text-sm text-gray-500">
+                  Verified Purchase
+                </CardFooter>
               </Card>
             ))}
           </div>
         </div>
       </section>
     </div>
-  )
+  );
 }

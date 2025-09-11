@@ -1,0 +1,243 @@
+[
+  {
+    "id": "15",
+    "name": "Tiger Eye Courage",
+    "description": "A powerful bracelet crafted with natural tiger eye stones for courage and confidence.",
+    "shortDesc": "Boosts willpower and protection.",
+    "category": "Confidence",
+    "price": 899,
+    "image": "/bracelets/tigereye.png",
+    "bulletPoints": [
+      "Made with genuine tiger eye gemstones",
+      "Enhances courage and confidence",
+      "Promotes grounding and protection",
+      "Beautiful golden-brown sheen",
+      "Ideal for leaders and decision-makers"
+    ]
+  },
+
+  {
+    "id": "1",
+    "name": "Amethyst Serenity",
+    "description": "A calming bracelet made with genuine amethyst stones.",
+    "shortDesc": "Promotes peace and tranquility.",
+    "category": "Calming",
+    "price": 799,
+    "image": "/bracelets/amethyst.png",
+    "bulletPoints": [
+      "Handcrafted with natural amethyst",
+      "Promotes inner peace",
+      "Helps relieve stress",
+      "Elegant and versatile design",
+      "Perfect for meditation"
+    ]
+  },
+  {
+    "id": "3",
+    "name": "Red Jasper Strength",
+    "description": "A grounding bracelet made with natural red jasper stones for strength and stability.",
+    "shortDesc": "Boosts confidence and endurance.",
+    "category": "Strength",
+    "price": 749,
+    "image": "/bracelets/redjasper.png",
+    "bulletPoints": [
+      "Crafted with genuine red jasper",
+      "Enhances physical energy",
+      "Promotes stability and grounding",
+      "Bold earthy red tone",
+      "Ideal for daily wear"
+    ]
+  },
+  {
+    "id": "2",
+    "name": "Rose Quartz Love",
+    "description": "Embrace love and compassion with this rose quartz bracelet.",
+    "shortDesc": "Attracts love and harmony.",
+    "category": "Love",
+    "price": 899,
+    "image": "/bracelets/rosequartz.jpg",
+    "bulletPoints": [
+      "Made with authentic rose quartz",
+      "Encourages self-love",
+      "Balances emotions",
+      "Gentle pink hue",
+      "Ideal gift for loved ones"
+    ]
+  },
+  {
+    "id": "4",
+    "name": "Sodalite Insight",
+    "description": "A bracelet of wisdom made with deep blue sodalite stones.",
+    "shortDesc": "Encourages clarity and intuition.",
+    "category": "Wisdom",
+    "price": 829,
+    "image": "/bracelets/sodalite.png",
+    "bulletPoints": [
+      "Authentic sodalite gemstones",
+      "Supports rational thought",
+      "Promotes self-expression",
+      "Soothing deep blue hue",
+      "Perfect for students and thinkers"
+    ]
+  },
+  {
+    "id": "5",
+    "name": "Seven Chakra Harmony",
+    "description": "A vibrant bracelet balancing all seven chakras with multi-gemstone beads.",
+    "shortDesc": "Restores balance and positive energy.",
+    "category": "Chakra",
+    "price": 999,
+    "image": "/bracelets/sevenchakra.jpg",
+    "bulletPoints": [
+      "Contains seven natural gemstones",
+      "Balances chakra energy",
+      "Boosts spiritual alignment",
+      "Colorful and stylish design",
+      "Ideal for meditation and yoga"
+    ]
+  },
+  {
+    "id": "6",
+    "name": "Quartz Rose Glow",
+    "description": "A delicate rose quartz bracelet symbolizing love and compassion.",
+    "shortDesc": "Heals emotional wounds and attracts love.",
+    "category": "Love",
+    "price": 899,
+    "image": "/bracelets/quartzrose.jpg",
+    "bulletPoints": [
+      "Made with premium rose quartz",
+      "Encourages compassion",
+      "Balances heart chakra",
+      "Elegant soft pink design",
+      "Perfect gift for loved ones"
+    ]
+  },
+  {
+    "id": "7",
+    "name": "Opal Dream",
+    "description": "A mystical bracelet with shimmering opal stones for creativity and inspiration.",
+    "shortDesc": "Ignites imagination and passion.",
+    "category": "Creativity",
+    "price": 1199,
+    "image": "/bracelets/opal.jpg",
+    "bulletPoints": [
+      "Crafted with dazzling opal beads",
+      "Encourages originality",
+      "Brings emotional balance",
+      "Unique iridescent shine",
+      "Ideal for artists and dreamers"
+    ]
+  },
+  {
+    "id": "8",
+    "name": "Onyx Blue Calm",
+    "description": "A soothing bracelet made from natural blue onyx stones.",
+    "shortDesc": "Promotes calmness and strength.",
+    "category": "Balance",
+    "price": 849,
+    "image": "/bracelets/onyxblue.jpg",
+    "bulletPoints": [
+      "Genuine blue onyx stones",
+      "Calms emotions",
+      "Supports decision-making",
+      "Chic and versatile accessory",
+      "Perfect for stress relief"
+    ]
+  },
+  {
+    "id": "9",
+    "name": "Onyx Black Protection",
+    "description": "A bold bracelet crafted from natural black onyx stones for grounding and protection.",
+    "shortDesc": "Shields against negativity.",
+    "category": "Protection",
+    "price": 899,
+    "image": "/bracelets/onyxblack.jpg",
+    "bulletPoints": [
+      "Premium black onyx gemstones",
+      "Provides emotional strength",
+      "Absorbs negative energy",
+      "Sleek black design",
+      "Perfect for daily protection"
+    ]
+  },
+  {
+    "id": "10",
+    "name": "Labradorite Magic",
+    "description": "A mystical bracelet of labradorite stones with a captivating glow.",
+    "shortDesc": "Enhances intuition and transformation.",
+    "category": "Spiritual",
+    "price": 1099,
+    "image": "/bracelets/labradorite.jpg",
+    "bulletPoints": [
+      "Made with labradorite crystals",
+      "Boosts spiritual awareness",
+      "Encourages positive change",
+      "Unique iridescent flash",
+      "Perfect for meditation"
+    ]
+  },
+  {
+    "id": "11",
+    "name": "Howlite Peace",
+    "description": "A calming bracelet made with white howlite stones.",
+    "shortDesc": "Brings peace and patience.",
+    "category": "Calming",
+    "price": 799,
+    "image": "/bracelets/howlite.jpg",
+    "bulletPoints": [
+      "Natural white howlite beads",
+      "Reduces stress and anger",
+      "Promotes patience",
+      "Elegant white design",
+      "Perfect for mindfulness"
+    ]
+  },
+  {
+    "id": "12",
+    "name": "Hematite Focus",
+    "description": "A grounding bracelet made from natural hematite stones for focus and stability.",
+    "shortDesc": "Boosts concentration and energy.",
+    "category": "Focus",
+    "price": 849,
+    "image": "/bracelets/hematite.png",
+    "bulletPoints": [
+      "Crafted with polished hematite",
+      "Increases mental clarity",
+      "Promotes grounding and balance",
+      "Modern metallic look",
+      "Great for work and study"
+    ]
+  },
+  {
+    "id": "13",
+    "name": "Fluorite Clarity",
+    "description": "A vibrant bracelet of fluorite stones enhancing clarity and decision-making.",
+    "shortDesc": "Improves focus and intuition.",
+    "category": "Clarity",
+    "price": 879,
+    "image": "/bracelets/fluorite.jpg",
+    "bulletPoints": [
+      "Authentic fluorite gemstones",
+      "Supports learning and memory",
+      "Promotes mental clarity",
+      "Colorful and eye-catching design",
+      "Ideal for students and professionals"
+    ]
+  },
+  {
+    "id": "14",
+    "name": "Green Jade Prosperity",
+    "description": "A beautiful bracelet made with green jade stones for luck and prosperity.",
+    "shortDesc": "Attracts abundance and harmony.",
+    "category": "Prosperity",
+    "price": 949,
+    "image": "/bracelets/greenjade.jpg",
+    "bulletPoints": [
+      "Natural green jade gemstones",
+      "Brings good fortune",
+      "Balances heart chakra",
+      "Elegant green design",
+      "Perfect prosperity charm"
+    ]
+  }
+]

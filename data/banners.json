@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1",
+    "title": "Discover the Healing Power of Crystals",
+    "subtitle": "Handcrafted crystal bracelets designed to bring balance, harmony, and positive energy into your life.",
+    "image": "/bracelets/pyrite.png",
+    "ctaText": "Shop Now",
+    "ctaLink": "/products",
+    "secondaryCtaText": "Learn More",
+    "secondaryCtaLink": "/benefits"
+  },
+  {
+    "id": "2",
+    "title": "New Arrivals Collection",
+    "subtitle": "Explore our latest crystal bracelets crafted with genuine gemstones for your well-being.",
+    "image": "/images/kyanite-bgb.png",
+    "ctaText": "View Collection",
+    "ctaLink": "/products?category=new",
+    "secondaryCtaText": "See Gallery",
+    "secondaryCtaLink": "/gallery"
+  },
+  {
+    "id": "3",
+    "title": "Experience Crystal Healing",
+    "subtitle": "Each bracelet is energetically cleansed and charged to support your journey toward balance and harmony.",
+    "image": "/images/aboutimg.jpg",
+    "ctaText": "Explore Benefits",
+    "ctaLink": "/benefits",
+    "secondaryCtaText": "Our Story",
+    "secondaryCtaLink": "/about"
+  },
+  {
+    "id": "4",
+    "title": "Handcrafted with Love Since 2017",
+    "subtitle": "Premium quality crystals, authentic gemstones, and expert craftsmanship in every piece.",
+    "image": "/images/img.jpg",
+    "ctaText": "Shop Best Sellers",
+    "ctaLink": "/products",
+    "secondaryCtaText": "Contact Us",
+    "secondaryCtaLink": "/contact"
+  }
+]

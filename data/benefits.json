@@ -1,0 +1,51 @@
+[
+  {
+    "id": "1",
+    "title": "Stress Relief & Relaxation",
+    "description": "Crystal bracelets like Amethyst and Howlite help calm the mind, reduce anxiety, and promote deep relaxation. Perfect for meditation and daily stress management.",
+    "image": "/images/benefit2.png",
+    "crystals": ["Amethyst", "Howlite", "Blue Lace Agate"]
+  },
+  {
+    "id": "2",
+    "title": "Enhanced Focus & Clarity",
+    "description": "Stones like Hematite and Fluorite sharpen mental clarity, improve concentration, and support decision-making. Ideal for students and professionals.",
+    "image": "/images/benefit3.jpg",
+    "crystals": ["Hematite", "Fluorite", "Clear Quartz"]
+  },
+  {
+    "id": "3",
+    "title": "Emotional Healing",
+    "description": "Rose Quartz and Unakite promote self-love, compassion, and emotional balance. They help heal past wounds and open the heart to new possibilities.",
+    "image": "/images/benefit4.jpg",
+    "crystals": ["Rose Quartz", "Unakite", "Rhodonite"]
+  },
+  {
+    "id": "4",
+    "title": "Protection & Grounding",
+    "description": "Black Onyx and Tiger Eye create a protective shield against negative energies while keeping you grounded and centered in challenging situations.",
+    "image": "/images/benefit5.png",
+    "crystals": ["Black Onyx", "Tiger Eye", "Black Tourmaline"]
+  },
+  {
+    "id": "5",
+    "title": "Prosperity & Abundance",
+    "description": "Green Jade and Pyrite attract wealth, success, and good fortune. They help manifest your goals and open doors to new opportunities.",
+    "image": "/images/benefit6.png",
+    "crystals": ["Green Jade", "Pyrite", "Citrine"]
+  },
+  {
+    "id": "6",
+    "title": "Spiritual Growth",
+    "description": "Labradorite and Amethyst enhance intuition, spiritual awareness, and connection to higher consciousness. Perfect for meditation and spiritual practices.",
+    "image": "/images/benefit7.png",
+    "crystals": ["Labradorite", "Amethyst", "Selenite"]
+  },
+  {
+    "id": "7",
+    "title": "Physical Vitality",
+    "description": "Red Jasper and Carnelian boost physical energy, stamina, and vitality. They support the body's natural healing processes and promote overall wellness.",
+    "image": "/images/benefit8.png",
+    "crystals": ["Red Jasper", "Carnelian", "Bloodstone"]
+  }
+]

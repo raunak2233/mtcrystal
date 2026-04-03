@@ -1,0 +1,50 @@
+[
+  {
+    "id": "calming",
+    "name": "Calming",
+    "slug": "calming",
+    "description": "Crystals that promote peace, tranquility, and stress relief"
+  },
+  {
+    "id": "love",
+    "name": "Love",
+    "slug": "love",
+    "description": "Crystals that attract love, compassion, and emotional healing"
+  },
+  {
+    "id": "strength",
+    "name": "Strength",
+    "slug": "strength",
+    "description": "Crystals that boost confidence, endurance, and physical energy"
+  },
+  {
+    "id": "wisdom",
+    "name": "Wisdom",
+    "slug": "wisdom",
+    "description": "Crystals that enhance clarity, intuition, and rational thought"
+  },
+  {
+    "id": "confidence",
+    "name": "Confidence",
+    "slug": "confidence",
+    "description": "Crystals that boost courage, willpower, and self-assurance"
+  },
+  {
+    "id": "protection",
+    "name": "Protection",
+    "slug": "protection",
+    "description": "Crystals that shield against negativity and provide grounding"
+  },
+  {
+    "id": "prosperity",
+    "name": "Prosperity",
+    "slug": "prosperity",
+    "description": "Crystals that attract abundance, luck, and good fortune"
+  },
+  {
+    "id": "spiritual",
+    "name": "Spiritual",
+    "slug": "spiritual",
+    "description": "Crystals that enhance spiritual awareness and transformation"
+  }
+]

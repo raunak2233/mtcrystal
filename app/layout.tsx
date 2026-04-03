@@ -1,11 +1,13 @@
 import type React from "react"
 import "@/app/globals.css"
-import { Inter } from "next/font/google"
+import { Playfair_Display, Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
-import { SiteHeader } from "@/components/site-header"
+import { EcommerceHeader } from "@/components/ecommerce-header"
 import { SiteFooter } from "@/components/site-footer"
+import { Toaster } from "sonner"
 
-const inter = Inter({ subsets: ["latin"] })
+const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" })
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
 export const metadata = {
   title: "MT Crystals - Handcrafted Crystal Bracelets",
@@ -21,13 +23,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.variable} ${playfair.variable} font-sans`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <div className="relative flex min-h-screen flex-col">
-            <SiteHeader />
+            <EcommerceHeader />
             <main className="flex-1">{children}</main>
             <SiteFooter />
           </div>
+          <Toaster position="top-right" richColors />
         </ThemeProvider>
       </body>
     </html>

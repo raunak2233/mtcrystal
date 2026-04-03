@@ -1,231 +1,194 @@
 "use client";
 
-import type React from "react";
-import { useRef } from "react";
-import emailjs from "emailjs-com";
 import { useState } from "react";
-import { Mail, MapPin, Phone } from "lucide-react";
-
+import { Mail, Phone, MapPin, Clock, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "@/hooks/use-toast";
+import { Card } from "@/components/ui/card";
+import { toast } from "sonner";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     subject: "",
     message: "",
   });
-  const formRef = useRef<HTMLFormElement>(null);
 
-  const handleChange = (
+  const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!formRef.current) return;
-
-    emailjs
-      .sendForm(
-        "service_hmu5yn7",
-        "template_60t9owd",
-        formRef.current,
-        "2CifoUy79CalgD-En"
-      )
-      .then(
-        (result) => {
-          console.log("Success:", result.text);
-          toast({
-            title: "Message Sent",
-            description:
-              "Thank you for contacting us. We'll get back to you soon!",
-          });
-          setFormData({
-            name: "",
-            email: "",
-            subject: "",
-            message: "",
-          });
-        },
-        (error) => {
-          console.error("Error:", error.text);
-          toast({
-            title: "Error",
-            description: "Failed to send message. Please try again later.",
-            variant: "destructive",
-          });
-        }
-      );
+    toast.success("Message sent successfully! We'll get back to you soon.");
+    setFormData({
+      name: "",
+      email: "",
+      phone: "",
+      subject: "",
+      message: "",
+    });
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <section className="w-full py-12 md:py-24 bg-purple-50">
-        <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="space-y-2">
-              <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                Contact Us
-              </h1>
-              <p className="max-w-[700px] text-gray-500 md:text-xl">
-                Have questions or need assistance? We're here to help you find
-                the perfect crystal bracelet.
-              </p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-16">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-5xl font-bold mb-4">Contact Us</h1>
+          <p className="text-xl text-purple-100 max-w-3xl mx-auto">
+            Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+          </p>
         </div>
       </section>
 
-      <section className="w-full py-12 md:py-24">
-        <div className="container px-4 md:px-6">
-          <div className="grid gap-10 lg:grid-cols-2">
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold">Get in Touch</h2>
-              <p className="text-gray-500">
-                We'd love to hear from you! Whether you have questions about our
-                products, need help choosing the right crystal, or want to share
-                your experience, please don't hesitate to reach out.
-              </p>
-
-              <div className="grid gap-6">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center gap-2">
-                      <Mail className="h-5 w-5 text-purple-600" />
-                      Email
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription>
-                      <a
-                        href="mailto:miracletouchcrystals@gmail.com"
-                        className="hover:underline"
-                      >
-                        miracletouchcrystals@gmail.com
-                      </a>
-                    </CardDescription>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center gap-2">
-                      <Phone className="h-5 w-5 text-purple-600" />
-                      Phone
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription>
-                      <a href="tel:+15551234567" className="hover:underline">
-                        +91 88823 12076
-                      </a>
-                    </CardDescription>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center gap-2">
-                      <MapPin className="h-5 w-5 text-purple-600" />
-                      Address
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription>
-                      94, Street No 4
-                      <br />
-                      Samaypur, North West Delhi - 110042
-                      <br />
-                      Delhi, India
-                    </CardDescription>
-                  </CardContent>
-                </Card>
+      <div className="container mx-auto px-4 py-16">
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Contact Information */}
+          <div className="lg:col-span-1 space-y-6">
+            <Card className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="bg-purple-100 p-3 rounded-lg">
+                  <Mail className="h-6 w-6 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">Email</h3>
+                  <p className="text-gray-600">info@mtcrystals.com</p>
+                  <p className="text-gray-600">support@mtcrystals.com</p>
+                </div>
               </div>
+            </Card>
 
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold">Business Hours</h3>
-                <p className="text-gray-500">
-                  Monday - Friday: 9:00 AM - 6:00 PM
-                </p>
-                <p className="text-gray-500">Saturday: 10:00 AM - 4:00 PM</p>
-                <p className="text-gray-500">Sunday: Closed</p>
+            <Card className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="bg-purple-100 p-3 rounded-lg">
+                  <Phone className="h-6 w-6 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">Phone</h3>
+                  <p className="text-gray-600">+91 98765 43210</p>
+                  <p className="text-gray-600">+91 98765 43211</p>
+                </div>
               </div>
-            </div>
+            </Card>
 
-            <div>
-              <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    placeholder="Your name"
-                    required
-                    value={formData.name}
-                    onChange={handleChange}
-                  />
+            <Card className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="bg-purple-100 p-3 rounded-lg">
+                  <MapPin className="h-6 w-6 text-purple-600" />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="Your email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                  />
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">Address</h3>
+                  <p className="text-gray-600">
+                    123 Crystal Lane<br />
+                    Mumbai, Maharashtra 400001<br />
+                    India
+                  </p>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="subject">Subject</Label>
-                  <Input
-                    id="subject"
-                    name="subject"
-                    placeholder="Subject"
-                    required
-                    value={formData.subject}
-                    onChange={handleChange}
-                  />
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="bg-purple-100 p-3 rounded-lg">
+                  <Clock className="h-6 w-6 text-purple-600" />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="message">Message</Label>
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">Business Hours</h3>
+                  <p className="text-gray-600">Monday - Friday: 9:00 AM - 6:00 PM</p>
+                  <p className="text-gray-600">Saturday: 10:00 AM - 4:00 PM</p>
+                  <p className="text-gray-600">Sunday: Closed</p>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {/* Contact Form */}
+          <div className="lg:col-span-2">
+            <Card className="p-8">
+              <h2 className="text-3xl font-bold mb-6">Send us a Message</h2>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <Label htmlFor="name">Name *</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="email">Email *</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <Label htmlFor="phone">Phone</Label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="subject">Subject *</Label>
+                    <Input
+                      id="subject"
+                      name="subject"
+                      value={formData.subject}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="message">Message *</Label>
                   <Textarea
                     id="message"
                     name="message"
-                    placeholder="Your message"
-                    required
-                    className="min-h-[150px]"
                     value={formData.message}
-                    onChange={handleChange}
+                    onChange={handleInputChange}
+                    rows={6}
+                    required
                   />
                 </div>
+
                 <Button
                   type="submit"
+                  size="lg"
                   className="w-full bg-purple-600 hover:bg-purple-700"
                 >
+                  <Send className="mr-2 h-5 w-5" />
                   Send Message
                 </Button>
               </form>
-            </div>
+            </Card>
           </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

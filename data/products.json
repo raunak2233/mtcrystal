@@ -1,0 +1,212 @@
+[
+  {
+    "id": "15",
+    "name": "Tiger Eye Courage",
+    "description": "A powerful bracelet crafted with natural tiger eye stones for courage and confidence.",
+    "shortDesc": "Boosts willpower and protection.",
+    "category": "confidence",
+    "price": 899,
+    "image": "/bracelets/tigereye.png",
+    "images": ["/bracelets/tigereye.png"],
+    "stock": 25,
+    "featured": true,
+    "newArrival": false,
+    "bestSeller": true,
+    "bulletPoints": [
+      "Made with genuine tiger eye gemstones",
+      "Enhances courage and confidence",
+      "Promotes grounding and protection",
+      "Beautiful golden-brown sheen",
+      "Ideal for leaders and decision-makers"
+    ]
+  },
+  {
+    "id": "1",
+    "name": "Amethyst Serenity",
+    "description": "A calming bracelet made with genuine amethyst stones.",
+    "shortDesc": "Promotes peace and tranquility.",
+    "category": "calming",
+    "price": 799,
+    "image": "/bracelets/amethyst.png",
+    "images": ["/bracelets/amethyst.png"],
+    "stock": 30,
+    "featured": true,
+    "newArrival": true,
+    "bestSeller": true,
+    "bulletPoints": [
+      "Handcrafted with natural amethyst",
+      "Promotes inner peace",
+      "Helps relieve stress",
+      "Elegant and versatile design",
+      "Perfect for meditation"
+    ]
+  },
+  {
+    "id": "3",
+    "name": "Red Jasper Strength",
+    "description": "A grounding bracelet made with natural red jasper stones for strength and stability.",
+    "shortDesc": "Boosts confidence and endurance.",
+    "category": "strength",
+    "price": 749,
+    "image": "/bracelets/redjasper.png",
+    "images": ["/bracelets/redjasper.png"],
+    "stock": 20,
+    "featured": false,
+    "newArrival": false,
+    "bestSeller": true,
+    "bulletPoints": [
+      "Crafted with genuine red jasper",
+      "Enhances physical energy",
+      "Promotes stability and grounding",
+      "Bold earthy red tone",
+      "Ideal for daily wear"
+    ]
+  },
+  {
+    "id": "4",
+    "name": "Sodalite Insight",
+    "description": "A bracelet of wisdom made with deep blue sodalite stones.",
+    "shortDesc": "Encourages clarity and intuition.",
+    "category": "wisdom",
+    "price": 829,
+    "image": "/bracelets/sodalite.png",
+    "images": ["/bracelets/sodalite.png"],
+    "stock": 18,
+    "featured": true,
+    "newArrival": true,
+    "bestSeller": false,
+    "bulletPoints": [
+      "Authentic sodalite gemstones",
+      "Supports rational thought",
+      "Promotes self-expression",
+      "Soothing deep blue hue",
+      "Perfect for students and thinkers"
+    ]
+  },
+  {
+    "id": "9",
+    "name": "Onyx Black Protection",
+    "description": "A bold bracelet crafted from natural black onyx stones for grounding and protection.",
+    "shortDesc": "Shields against negativity.",
+    "category": "protection",
+    "price": 899,
+    "image": "/bracelets/onyxblack.jpg",
+    "images": ["/bracelets/onyxblack.jpg"],
+    "stock": 22,
+    "featured": false,
+    "newArrival": true,
+    "bestSeller": true,
+    "bulletPoints": [
+      "Premium black onyx gemstones",
+      "Provides emotional strength",
+      "Absorbs negative energy",
+      "Sleek black design",
+      "Perfect for daily protection"
+    ]
+  },
+  {
+    "id": "12",
+    "name": "Hematite Focus",
+    "description": "A grounding bracelet made from natural hematite stones for focus and stability.",
+    "shortDesc": "Boosts concentration and energy.",
+    "category": "confidence",
+    "price": 849,
+    "image": "/bracelets/hematite.png",
+    "images": ["/bracelets/hematite.png"],
+    "stock": 15,
+    "featured": true,
+    "newArrival": false,
+    "bestSeller": true,
+    "bulletPoints": [
+      "Crafted with polished hematite",
+      "Increases mental clarity",
+      "Promotes grounding and balance",
+      "Modern metallic look",
+      "Great for work and study"
+    ]
+  },
+  {
+    "id": "14",
+    "name": "Green Jade Prosperity",
+    "description": "A beautiful bracelet made with green jade stones for luck and prosperity.",
+    "shortDesc": "Attracts abundance and harmony.",
+    "category": "prosperity",
+    "price": 949,
+    "image": "/bracelets/greenjade.jpg",
+    "images": ["/bracelets/greenjade.jpg"],
+    "stock": 12,
+    "featured": false,
+    "newArrival": true,
+    "bestSeller": false,
+    "bulletPoints": [
+      "Natural green jade gemstones",
+      "Brings good fortune",
+      "Balances heart chakra",
+      "Elegant green design",
+      "Perfect prosperity charm"
+    ]
+  },
+  {
+    "id": "6",
+    "name": "Blue Kyanite Clarity",
+    "description": "A stunning bracelet featuring natural blue kyanite stones for mental clarity and communication.",
+    "shortDesc": "Enhances communication and self-expression.",
+    "category": "wisdom",
+    "price": 979,
+    "image": "/bracelets/bluekyanite.png",
+    "images": ["/bracelets/bluekyanite.png"],
+    "stock": 14,
+    "featured": true,
+    "newArrival": true,
+    "bestSeller": false,
+    "bulletPoints": [
+      "Genuine blue kyanite crystals",
+      "Promotes clear communication",
+      "Enhances logical thinking",
+      "Beautiful blue striations",
+      "Ideal for public speakers"
+    ]
+  },
+  {
+    "id": "7",
+    "name": "Pyrite Abundance",
+    "description": "A powerful bracelet made with natural pyrite stones for wealth and manifestation.",
+    "shortDesc": "Attracts prosperity and success.",
+    "category": "prosperity",
+    "price": 1099,
+    "image": "/bracelets/pyrite.png",
+    "images": ["/bracelets/pyrite.png"],
+    "stock": 10,
+    "featured": false,
+    "newArrival": false,
+    "bestSeller": true,
+    "bulletPoints": [
+      "Natural pyrite fool's gold",
+      "Manifests abundance",
+      "Boosts confidence and willpower",
+      "Metallic golden luster",
+      "Perfect for entrepreneurs"
+    ]
+  },
+  {
+    "id": "8",
+    "name": "Unakite Balance",
+    "description": "A harmonizing bracelet crafted with natural unakite stones for emotional balance.",
+    "shortDesc": "Promotes emotional healing and balance.",
+    "category": "calming",
+    "price": 799,
+    "image": "/bracelets/unakite.png",
+    "images": ["/bracelets/unakite.png"],
+    "stock": 16,
+    "featured": false,
+    "newArrival": true,
+    "bestSeller": false,
+    "bulletPoints": [
+      "Natural unakite gemstones",
+      "Balances emotions",
+      "Supports recovery and healing",
+      "Unique pink and green patterns",
+      "Great for meditation"
+    ]
+  }
+]

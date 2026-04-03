@@ -1,0 +1,86 @@
+[
+  {
+    "id": "1",
+    "title": "Amethyst Collection",
+    "description": "Beautiful purple amethyst bracelets",
+    "image": "/bracelets/amethyst.png",
+    "category": "Products"
+  },
+  {
+    "id": "2",
+    "title": "Tiger Eye Craftsmanship",
+    "description": "Handcrafted tiger eye bracelets",
+    "image": "/bracelets/tigereye.png",
+    "category": "Products"
+  },
+  {
+    "id": "3",
+    "title": "Green Jade Beauty",
+    "description": "Elegant green jade pieces",
+    "image": "/bracelets/greenjade.jpg",
+    "category": "Products"
+  },
+  {
+    "id": "4",
+    "title": "Hematite Elegance",
+    "description": "Sleek metallic hematite bracelets",
+    "image": "/bracelets/hematite.png",
+    "category": "Products"
+  },
+  {
+    "id": "5",
+    "title": "Blue Kyanite Magic",
+    "description": "Stunning blue kyanite crystals",
+    "image": "/bracelets/bluekyanite.png",
+    "category": "Products"
+  },
+  {
+    "id": "6",
+    "title": "Pyrite Abundance",
+    "description": "Golden pyrite fool's gold",
+    "image": "/bracelets/pyrite.png",
+    "category": "Products"
+  },
+  {
+    "id": "7",
+    "title": "Red Jasper Power",
+    "description": "Bold red jasper strength",
+    "image": "/bracelets/redjasper.png",
+    "category": "Products"
+  },
+  {
+    "id": "8",
+    "title": "Sodalite Wisdom",
+    "description": "Deep blue sodalite insight",
+    "image": "/bracelets/sodalite.png",
+    "category": "Products"
+  },
+  {
+    "id": "9",
+    "title": "Unakite Balance",
+    "description": "Pink and green unakite harmony",
+    "image": "/bracelets/unakite.png",
+    "category": "Products"
+  },
+  {
+    "id": "10",
+    "title": "Crystal Workshop",
+    "description": "Behind the scenes of our crafting process",
+    "image": "/images/aboutimg.jpg",
+    "category": "Workshop"
+  },
+  {
+    "id": "11",
+    "title": "Natural Crystals",
+    "description": "Raw crystal materials",
+    "image": "/images/img.jpg",
+    "category": "Materials"
+  },
+  {
+    "id": "12",
+    "title": "Kyanite Background",
+    "description": "Beautiful kyanite display",
+    "image": "/images/kyanite-bgb.png",
+    "category": "Display"
+  }
+]

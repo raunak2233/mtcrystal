@@ -1,153 +1,126 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { ProductCard } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
-// Import products data
-import productsData from "@/lib/products.json";
-
-type Product = {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  image: string;
-  category: string;
-  bulletPoints: string[];
-  shortDesc: string;
-};
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import products from "@/data/products.json";
+import categories from "@/data/categories.json";
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const searchParams = useSearchParams();
+  const [filteredProducts, setFilteredProducts] = useState(products);
+  const [sortBy, setSortBy] = useState("featured");
 
   useEffect(() => {
-    setProducts(productsData as Product[]);
-  }, []);
+    let result = [...products];
+    
+    // Filter by category
+    const categoryParam = searchParams.get("category");
+    if (categoryParam) {
+      result = result.filter(p => p.category === categoryParam);
+    }
+    
+    // Filter by search
+    const searchParam = searchParams.get("search");
+    if (searchParam) {
+      const query = searchParam.toLowerCase();
+      result = result.filter(p => 
+        p.name.toLowerCase().includes(query) ||
+        p.description.toLowerCase().includes(query) ||
+        p.category.toLowerCase().includes(query)
+      );
+    }
+    
+    // Sort
+    if (sortBy === "price-low") {
+      result.sort((a, b) => a.price - b.price);
+    } else if (sortBy === "price-high") {
+      result.sort((a, b) => b.price - a.price);
+    } else if (sortBy === "name") {
+      result.sort((a, b) => a.name.localeCompare(b.name));
+    }
+    
+    setFilteredProducts(result);
+  }, [searchParams, sortBy]);
 
-  const handleBuyNow = (product: Product) => {
-    setSelectedProduct(product);
-  };
-
-  const closeModal = () => {
-    setSelectedProduct(null);
-  };
+  const categoryParam = searchParams.get("category");
+  const searchParam = searchParams.get("search");
+  const currentCategory = categories.find(c => c.slug === categoryParam);
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <section className="w-full py-12 md:py-24 bg-purple-50">
-        <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="space-y-2">
-              <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                Our Crystal Bracelets
-              </h1>
-              <p className="max-w-[700px] text-gray-500 md:text-xl">
-                Explore our collection of handcrafted crystal bracelets, each
-                designed to bring specific energies into your life.
-              </p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2">
+            {searchParam ? `Search Results for "${searchParam}"` : 
+             currentCategory ? currentCategory.name : "All Products"}
+          </h1>
+          {currentCategory && (
+            <p className="text-gray-600 text-lg">{currentCategory.description}</p>
+          )}
+          <p className="text-gray-600 mt-2">{filteredProducts.length} products found</p>
         </div>
-      </section>
 
-      <section className="w-full py-12 md:py-24">
-        <div className="container px-4 md:px-6">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {products.map((product) => (
-              <Card key={product.id} className="overflow-hidden">
-                <CardHeader className="p-0">
-                  <div className="flex justify-center p-6 bg-purple-50">
-                    <Image
-                      src={product.image || "/placeholder.svg"}
-                      alt={product.name}
-                      width={200}
-                      height={200}
-                      className="object-cover"
-                    />
-                  </div>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="mb-2">
-                    <span className="inline-block px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
-                      {product.category}
-                    </span>
-                  </div>
-                  <CardTitle className="mb-2">{product.name}</CardTitle>
-                  <p className="text-sm text-gray-500">{product.description}</p>
-                  <p className="mt-4 font-bold text-lg">₹{product.price}</p>
-                </CardContent>
-                <CardFooter className="p-6 pt-0">
-                  <Button
-                    className="w-full bg-purple-600 hover:bg-purple-700"
-                    onClick={() => handleBuyNow(product)}
-                  >
-                    Buy Now
-                  </Button>
-                </CardFooter>
-              </Card>
+        {/* Filters and Sort */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant={!categoryParam ? "default" : "outline"}
+              onClick={() => window.location.href = "/products"}
+              className={!categoryParam ? "bg-purple-600" : ""}
+            >
+              All
+            </Button>
+            {categories.map((category) => (
+              <Button
+                key={category.id}
+                variant={categoryParam === category.slug ? "default" : "outline"}
+                onClick={() => window.location.href = `/products?category=${category.slug}`}
+                className={categoryParam === category.slug ? "bg-purple-600" : ""}
+              >
+                {category.name}
+              </Button>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* Modal */}
-      {selectedProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6 relative">
-            <button
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-              onClick={closeModal}
-            >
-              ×
-            </button>
-            <div className="flex flex-col items-center">
-              <Image
-                src={selectedProduct.image || "/placeholder.svg"}
-                alt={selectedProduct.name}
-                width={180}
-                height={180}
-                className="object-cover mb-4"
-              />
-              <h2 className="text-2xl font-bold mb-2">
-                {selectedProduct.name}
-              </h2>
-              <span className="inline-block px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800 mb-2">
-                {selectedProduct.category}
-              </span>
-              <p className="text-sm text-gray-500 mb-2">
-                {selectedProduct.shortDesc}
-              </p>
-              <ul className="list-disc pl-5 mb-4 text-gray-700 text-sm">
-                {selectedProduct.bulletPoints.map((point, idx) => (
-                  <li key={idx}>{point}</li>
-                ))}
-              </ul>
-              <p className="font-bold text-lg mb-4">₹{selectedProduct.price}</p>
-              <Link
-                href={`https://api.whatsapp.com/send?phone=919999492068&text=Hey!%20I%20would%20like%20to%20make%20a%20purchase%20of%20${encodeURIComponent(
-                  selectedProduct.name
-                )}.`}
-                target="_blank"
-                className="w-full"
-              >
-                <Button className="w-full bg-purple-600 hover:bg-purple-700">
-                  Proceed to WhatsApp
-                </Button>
-              </Link>
-            </div>
-          </div>
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="featured">Featured</SelectItem>
+              <SelectItem value="price-low">Price: Low to High</SelectItem>
+              <SelectItem value="price-high">Price: High to Low</SelectItem>
+              <SelectItem value="name">Name: A to Z</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-      )}
+
+        {/* Products Grid */}
+        {filteredProducts.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16">
+            <p className="text-xl text-gray-600 mb-4">No products found</p>
+            <Button onClick={() => window.location.href = "/products"}>
+              View All Products
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

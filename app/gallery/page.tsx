@@ -1,95 +1,98 @@
-import Image from "next/image"
+"use client";
 
-const galleryImages = [
-  {
-    src: "/placeholder.svg?height=400&width=600",
-    alt: "Crystal bracelet collection display",
-    width: 600,
-    height: 400,
-  },
-  {
-    src: "/placeholder.svg?height=400&width=600",
-    alt: "Close-up of amethyst bracelet",
-    width: 600,
-    height: 400,
-  },
-  {
-    src: "/placeholder.svg?height=400&width=600",
-    alt: "Customer wearing rose quartz bracelet",
-    width: 600,
-    height: 400,
-  },
-  {
-    src: "/placeholder.svg?height=400&width=600",
-    alt: "Crystal bracelet making process",
-    width: 600,
-    height: 400,
-  },
-  {
-    src: "/placeholder.svg?height=400&width=600",
-    alt: "Selection of healing crystals",
-    width: 600,
-    height: 400,
-  },
-  {
-    src: "/placeholder.svg?height=400&width=600",
-    alt: "Crystal bracelet gift packaging",
-    width: 600,
-    height: 400,
-  },
-  {
-    src: "/placeholder.svg?height=400&width=600",
-    alt: "MT Crystals workshop",
-    width: 600,
-    height: 400,
-  },
-  {
-    src: "/placeholder.svg?height=400&width=600",
-    alt: "Customer meditation with crystal bracelet",
-    width: 600,
-    height: 400,
-  },
-  {
-    src: "/placeholder.svg?height=400&width=600",
-    alt: "Crystal energy cleansing ritual",
-    width: 600,
-    height: 400,
-  },
-]
+import { useState } from "react";
+import Image from "next/image";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import gallery from "@/data/gallery.json";
 
 export default function GalleryPage() {
+  const [selectedImage, setSelectedImage] = useState<typeof gallery[0] | null>(null);
+  const [filter, setFilter] = useState("All");
+
+  const categories = ["All", ...Array.from(new Set(gallery.map(item => item.category)))];
+  const filteredGallery = filter === "All" 
+    ? gallery 
+    : gallery.filter(item => item.category === filter);
+
   return (
-    <div className="flex flex-col min-h-screen">
-      <section className="w-full py-12 md:py-24 bg-purple-50">
-        <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="space-y-2">
-              <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl">Gallery</h1>
-              <p className="max-w-[700px] text-gray-500 md:text-xl">
-                Explore our collection of crystal bracelets, workshop images, and happy customers.
-              </p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-16">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-5xl font-bold mb-4">Our Gallery</h1>
+          <p className="text-xl text-purple-100 max-w-3xl mx-auto">
+            Explore our beautiful collection of crystal bracelets and see the craftsmanship that goes into each piece.
+          </p>
         </div>
       </section>
 
-      <section className="w-full py-12 md:py-24">
-        <div className="container px-4 md:px-6">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-            {galleryImages.map((image, index) => (
-              <div key={index} className="overflow-hidden rounded-lg">
-                <Image
-                  src={image.src || "/placeholder.svg"}
-                  alt={image.alt}
-                  width={image.width}
-                  height={image.height}
-                  className="w-full h-auto object-cover transition-transform duration-300 hover:scale-105"
-                />
-              </div>
-            ))}
-          </div>
+      {/* Filter Buttons */}
+      <section className="container mx-auto px-4 py-8">
+        <div className="flex flex-wrap justify-center gap-3">
+          {categories.map((category) => (
+            <Button
+              key={category}
+              variant={filter === category ? "default" : "outline"}
+              onClick={() => setFilter(category)}
+              className={filter === category ? "bg-purple-600" : ""}
+            >
+              {category}
+            </Button>
+          ))}
         </div>
       </section>
+
+      {/* Gallery Grid */}
+      <section className="container mx-auto px-4 pb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredGallery.map((item) => (
+            <Card
+              key={item.id}
+              className="group overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+              onClick={() => setSelectedImage(item)}
+            >
+              <div className="relative aspect-square overflow-hidden bg-gray-100">
+                <Image
+                  src={item.image}
+                  alt={item.title}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-1 group-hover:text-purple-600 transition-colors">
+                  {item.title}
+                </h3>
+                <p className="text-sm text-gray-600">{item.description}</p>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* Image Modal */}
+      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+        <DialogContent className="max-w-4xl">
+          {selectedImage && (
+            <div className="space-y-4">
+              <div className="relative aspect-square w-full overflow-hidden rounded-lg">
+                <Image
+                  src={selectedImage.image}
+                  alt={selectedImage.title}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold mb-2">{selectedImage.title}</h2>
+                <p className="text-gray-600">{selectedImage.description}</p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
-  )
+  );
 }

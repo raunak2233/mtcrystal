@@ -1,0 +1,36 @@
+[
+  {
+    "id": "b6125ad7-0d4a-4ded-8ff7-785a6dede184",
+    "orderNumber": "MTC-855614",
+    "userId": "998d6958-2c32-4347-aeb8-69e9b892efad",
+    "customerName": "John Doe",
+    "customerEmail": "john@gmail.com",
+    "customerPhone": "assssssssa",
+    "address": {
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john@gmail.com",
+      "phone": "assssssssa",
+      "address": "as",
+      "city": "as",
+      "state": "as",
+      "pincode": "as"
+    },
+    "items": [
+      {
+        "productId": "1",
+        "name": "Amethyst Serenity",
+        "price": 799,
+        "quantity": 1,
+        "image": "/bracelets/amethyst.png"
+      }
+    ],
+    "subtotal": 799,
+    "shipping": 0,
+    "total": 799,
+    "paymentMethod": "cod",
+    "status": "shipped",
+    "createdAt": "2026-04-04T07:47:35.614Z",
+    "updatedAt": "2026-04-04T08:39:14.777Z"
+  }
+]

@@ -1,123 +1,111 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { ProductCard } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import products from "@/data/products.json";
-import categories from "@/data/categories.json";
+import { readCategories, readProducts } from "@/lib/server/store";
 
-export default function ProductsPage() {
-  const searchParams = useSearchParams();
-  const [filteredProducts, setFilteredProducts] = useState(products);
-  const [sortBy, setSortBy] = useState("featured");
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string; search?: string; sort?: string }>;
+}) {
+  const params = await searchParams;
+  const products = await readProducts();
+  const categories = await readCategories();
+  const categoryParam = params.category;
+  const searchParam = params.search;
+  const sortBy = params.sort || "featured";
 
-  useEffect(() => {
-    let result = [...products];
-    
-    // Filter by category
-    const categoryParam = searchParams.get("category");
-    if (categoryParam) {
-      result = result.filter(p => p.category === categoryParam);
-    }
-    
-    // Filter by search
-    const searchParam = searchParams.get("search");
-    if (searchParam) {
-      const query = searchParam.toLowerCase();
-      result = result.filter(p => 
-        p.name.toLowerCase().includes(query) ||
-        p.description.toLowerCase().includes(query) ||
-        p.category.toLowerCase().includes(query)
-      );
-    }
-    
-    // Sort
-    if (sortBy === "price-low") {
-      result.sort((a, b) => a.price - b.price);
-    } else if (sortBy === "price-high") {
-      result.sort((a, b) => b.price - a.price);
-    } else if (sortBy === "name") {
-      result.sort((a, b) => a.name.localeCompare(b.name));
-    }
-    
-    setFilteredProducts(result);
-  }, [searchParams, sortBy]);
+  let filteredProducts = [...products];
 
-  const categoryParam = searchParams.get("category");
-  const searchParam = searchParams.get("search");
-  const currentCategory = categories.find(c => c.slug === categoryParam);
+  if (categoryParam) {
+    filteredProducts = filteredProducts.filter((product) => product.category === categoryParam);
+  }
+
+  if (searchParam) {
+    const query = searchParam.toLowerCase();
+    filteredProducts = filteredProducts.filter(
+      (product) =>
+        product.name.toLowerCase().includes(query) ||
+        product.description.toLowerCase().includes(query) ||
+        product.category.toLowerCase().includes(query)
+    );
+  }
+
+  if (sortBy === "price-low") {
+    filteredProducts.sort((a, b) => a.price - b.price);
+  } else if (sortBy === "price-high") {
+    filteredProducts.sort((a, b) => b.price - a.price);
+  } else if (sortBy === "name") {
+    filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  const currentCategory = categories.find((category) => category.slug === categoryParam);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">
-            {searchParam ? `Search Results for "${searchParam}"` : 
-             currentCategory ? currentCategory.name : "All Products"}
+          <h1 className="mb-2 text-4xl font-bold">
+            {searchParam
+              ? `Search Results for "${searchParam}"`
+              : currentCategory
+                ? currentCategory.name
+                : "All Products"}
           </h1>
-          {currentCategory && (
-            <p className="text-gray-600 text-lg">{currentCategory.description}</p>
-          )}
-          <p className="text-gray-600 mt-2">{filteredProducts.length} products found</p>
+          {currentCategory ? <p className="text-lg text-gray-600">{currentCategory.description}</p> : null}
+          <p className="mt-2 text-gray-600">{filteredProducts.length} products found</p>
         </div>
 
-        {/* Filters and Sort */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <div className="flex flex-wrap gap-2">
-            <Button
-              variant={!categoryParam ? "default" : "outline"}
-              onClick={() => window.location.href = "/products"}
-              className={!categoryParam ? "bg-purple-600" : ""}
-            >
-              All
-            </Button>
-            {categories.map((category) => (
-              <Button
-                key={category.id}
-                variant={categoryParam === category.slug ? "default" : "outline"}
-                onClick={() => window.location.href = `/products?category=${category.slug}`}
-                className={categoryParam === category.slug ? "bg-purple-600" : ""}
-              >
-                {category.name}
+            <Link href="/products">
+              <Button variant={!categoryParam ? "default" : "outline"} className={!categoryParam ? "bg-purple-600" : ""}>
+                All
               </Button>
+            </Link>
+            {categories.map((category) => (
+              <Link key={category.id} href={`/products?category=${category.slug}`}>
+                <Button variant={categoryParam === category.slug ? "default" : "outline"} className={categoryParam === category.slug ? "bg-purple-600" : ""}>
+                  {category.name}
+                </Button>
+              </Link>
             ))}
           </div>
 
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="featured">Featured</SelectItem>
-              <SelectItem value="price-low">Price: Low to High</SelectItem>
-              <SelectItem value="price-high">Price: High to Low</SelectItem>
-              <SelectItem value="name">Name: A to Z</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { value: "featured", label: "Featured" },
+              { value: "price-low", label: "Price: Low to High" },
+              { value: "price-high", label: "Price: High to Low" },
+              { value: "name", label: "Name: A to Z" },
+            ].map((option) => {
+              const params = new URLSearchParams();
+              if (categoryParam) params.set("category", categoryParam);
+              if (searchParam) params.set("search", searchParam);
+              if (option.value !== "featured") params.set("sort", option.value);
+              const href = params.toString() ? `/products?${params.toString()}` : "/products";
+
+              return (
+                <Link key={option.value} href={href}>
+                  <Button variant={sortBy === option.value ? "default" : "outline"} className={sortBy === option.value ? "bg-purple-600" : ""}>
+                    {option.label}
+                  </Button>
+                </Link>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Products Grid */}
         {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
         ) : (
-          <div className="text-center py-16">
-            <p className="text-xl text-gray-600 mb-4">No products found</p>
-            <Button onClick={() => window.location.href = "/products"}>
-              View All Products
-            </Button>
+          <div className="py-16 text-center">
+            <p className="mb-4 text-xl text-gray-600">No products found</p>
+            <Link href="/products"><Button>View All Products</Button></Link>
           </div>
         )}
       </div>

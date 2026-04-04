@@ -1,0 +1,36 @@
+[
+  {
+    "id": "998d6958-2c32-4347-aeb8-69e9b892efad",
+    "name": "John Doe",
+    "email": "john@gmail.com",
+    "passwordHash": "eb8b90bebdf48f47494477bcc017a14b:9c635cff8c118ccceacb57c07c77626a0bc041a847c8454de27aaf6a42f0ebf4ad2f66a2649d49210e08ad7571760eb95d54de229e2c0ae7b775ab3b439bc35c",
+    "isAdmin": true,
+    "createdAt": "2026-04-04T07:46:10.700Z",
+    "phone": "",
+    "addresses": []
+  },
+  {
+    "id": "866ff59f-5e3a-4cc1-a811-e21b47db2804",
+    "name": "Raunak",
+    "email": "raunak@gmail.com",
+    "passwordHash": "9cddae427aec7f028f82702fab63b944:7a581928b55955d4295f497f75a57811e3166fa1ebb290bebd5ea79a573f228100c64fb21a9a13e44716e004b25d1dec75a45d5f0cf24299d370c266f6906a48",
+    "isAdmin": true,
+    "createdAt": "2026-04-04T07:48:39.296Z",
+    "phone": "09999492068",
+    "addresses": [
+      {
+        "id": "ee2f62cc-88cd-4acb-ad73-f9f5fcc634ce",
+        "label": "Home",
+        "firstName": "Ye",
+        "lastName": "YR",
+        "email": "raunak@gmail.com",
+        "phone": "7894561237",
+        "address": "H.No. My Home, New",
+        "city": "Delhi",
+        "state": "Delhi",
+        "pincode": "110015",
+        "isDefault": true
+      }
+    ]
+  }
+]

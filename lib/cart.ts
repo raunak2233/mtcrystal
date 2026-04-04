@@ -1,5 +1,6 @@
 export interface CartItem {
   id: string;
+  slug?: string;
   name: string;
   price: number;
   quantity: number;
@@ -17,7 +18,7 @@ export const saveCart = (cart: CartItem[]): void => {
   localStorage.setItem('cart', JSON.stringify(cart));
 };
 
-export const addToCart = (product: { id: string; name: string; price: number; image: string }): void => {
+export const addToCart = (product: { id: string; slug?: string; name: string; price: number; image: string }): void => {
   const cart = getCart();
   const existingItem = cart.find(item => item.id === product.id);
   

@@ -7,7 +7,10 @@
     "category": "confidence",
     "price": 899,
     "image": "/bracelets/tigereye.png",
-    "images": ["/bracelets/tigereye.png"],
+    "images": [
+      "/bracelets/tigereye.png",
+      "/bracelets/tigereye.png"
+    ],
     "stock": 25,
     "featured": true,
     "newArrival": false,
@@ -18,28 +21,8 @@
       "Promotes grounding and protection",
       "Beautiful golden-brown sheen",
       "Ideal for leaders and decision-makers"
-    ]
-  },
-  {
-    "id": "1",
-    "name": "Amethyst Serenity",
-    "description": "A calming bracelet made with genuine amethyst stones.",
-    "shortDesc": "Promotes peace and tranquility.",
-    "category": "calming",
-    "price": 799,
-    "image": "/bracelets/amethyst.png",
-    "images": ["/bracelets/amethyst.png"],
-    "stock": 30,
-    "featured": true,
-    "newArrival": true,
-    "bestSeller": true,
-    "bulletPoints": [
-      "Handcrafted with natural amethyst",
-      "Promotes inner peace",
-      "Helps relieve stress",
-      "Elegant and versatile design",
-      "Perfect for meditation"
-    ]
+    ],
+    "slug": "tiger-eye-courage"
   },
   {
     "id": "3",
@@ -49,7 +32,9 @@
     "category": "strength",
     "price": 749,
     "image": "/bracelets/redjasper.png",
-    "images": ["/bracelets/redjasper.png"],
+    "images": [
+      "/bracelets/redjasper.png"
+    ],
     "stock": 20,
     "featured": false,
     "newArrival": false,
@@ -60,7 +45,8 @@
       "Promotes stability and grounding",
       "Bold earthy red tone",
       "Ideal for daily wear"
-    ]
+    ],
+    "slug": "red-jasper-strength"
   },
   {
     "id": "4",
@@ -70,7 +56,9 @@
     "category": "wisdom",
     "price": 829,
     "image": "/bracelets/sodalite.png",
-    "images": ["/bracelets/sodalite.png"],
+    "images": [
+      "/bracelets/sodalite.png"
+    ],
     "stock": 18,
     "featured": true,
     "newArrival": true,
@@ -81,7 +69,8 @@
       "Promotes self-expression",
       "Soothing deep blue hue",
       "Perfect for students and thinkers"
-    ]
+    ],
+    "slug": "sodalite-insight"
   },
   {
     "id": "9",
@@ -91,7 +80,9 @@
     "category": "protection",
     "price": 899,
     "image": "/bracelets/onyxblack.jpg",
-    "images": ["/bracelets/onyxblack.jpg"],
+    "images": [
+      "/bracelets/onyxblack.jpg"
+    ],
     "stock": 22,
     "featured": false,
     "newArrival": true,
@@ -102,7 +93,8 @@
       "Absorbs negative energy",
       "Sleek black design",
       "Perfect for daily protection"
-    ]
+    ],
+    "slug": "onyx-black-protection"
   },
   {
     "id": "12",
@@ -112,7 +104,9 @@
     "category": "confidence",
     "price": 849,
     "image": "/bracelets/hematite.png",
-    "images": ["/bracelets/hematite.png"],
+    "images": [
+      "/bracelets/hematite.png"
+    ],
     "stock": 15,
     "featured": true,
     "newArrival": false,
@@ -123,7 +117,8 @@
       "Promotes grounding and balance",
       "Modern metallic look",
       "Great for work and study"
-    ]
+    ],
+    "slug": "hematite-focus"
   },
   {
     "id": "14",
@@ -133,7 +128,9 @@
     "category": "prosperity",
     "price": 949,
     "image": "/bracelets/greenjade.jpg",
-    "images": ["/bracelets/greenjade.jpg"],
+    "images": [
+      "/bracelets/greenjade.jpg"
+    ],
     "stock": 12,
     "featured": false,
     "newArrival": true,
@@ -144,7 +141,8 @@
       "Balances heart chakra",
       "Elegant green design",
       "Perfect prosperity charm"
-    ]
+    ],
+    "slug": "green-jade-prosperity"
   },
   {
     "id": "6",
@@ -154,7 +152,9 @@
     "category": "wisdom",
     "price": 979,
     "image": "/bracelets/bluekyanite.png",
-    "images": ["/bracelets/bluekyanite.png"],
+    "images": [
+      "/bracelets/bluekyanite.png"
+    ],
     "stock": 14,
     "featured": true,
     "newArrival": true,
@@ -165,7 +165,8 @@
       "Enhances logical thinking",
       "Beautiful blue striations",
       "Ideal for public speakers"
-    ]
+    ],
+    "slug": "blue-kyanite-clarity"
   },
   {
     "id": "7",
@@ -175,7 +176,9 @@
     "category": "prosperity",
     "price": 1099,
     "image": "/bracelets/pyrite.png",
-    "images": ["/bracelets/pyrite.png"],
+    "images": [
+      "/bracelets/pyrite.png"
+    ],
     "stock": 10,
     "featured": false,
     "newArrival": false,
@@ -186,7 +189,8 @@
       "Boosts confidence and willpower",
       "Metallic golden luster",
       "Perfect for entrepreneurs"
-    ]
+    ],
+    "slug": "pyrite-abundance"
   },
   {
     "id": "8",
@@ -196,7 +200,9 @@
     "category": "calming",
     "price": 799,
     "image": "/bracelets/unakite.png",
-    "images": ["/bracelets/unakite.png"],
+    "images": [
+      "/bracelets/unakite.png"
+    ],
     "stock": 16,
     "featured": false,
     "newArrival": true,
@@ -207,6 +213,7 @@
       "Supports recovery and healing",
       "Unique pink and green patterns",
       "Great for meditation"
-    ]
+    ],
+    "slug": "unakite-balance"
   }
 ]

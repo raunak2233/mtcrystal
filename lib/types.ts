@@ -92,6 +92,33 @@ export type OrderStatus =
   | "delivered"
   | "cancelled";
 
+export type PaymentStatus =
+  | "pending"
+  | "created"
+  | "authorized"
+  | "captured"
+  | "paid"
+  | "failed"
+  | "refunded";
+
+export interface Payment {
+  id: string;
+  orderId: string;
+  userId: string | null;
+  provider: "razorpay" | "manual";
+  method: string;
+  status: PaymentStatus;
+  amount: number;
+  currency: string;
+  providerOrderId?: string;
+  providerPaymentId?: string;
+  providerSignature?: string;
+  providerPayload?: Record<string, unknown> | null;
+  paidAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Order {
   id: string;
   orderNumber: string;
@@ -105,6 +132,12 @@ export interface Order {
   shipping: number;
   total: number;
   paymentMethod: string;
+  paymentStatus: PaymentStatus;
+  paymentId?: string | null;
+  razorpayOrderId?: string | null;
+  razorpayPaymentId?: string | null;
+  razorpaySignature?: string | null;
+  paidAt?: string | null;
   status: OrderStatus;
   createdAt: string;
   updatedAt: string;

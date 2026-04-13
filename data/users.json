@@ -32,5 +32,15 @@
         "isDefault": true
       }
     ]
+  },
+  {
+    "id": "ba5cf927-bb1f-4af5-8c8a-29216918ab68",
+    "name": "Rakesh",
+    "email": "rak@gmail.com",
+    "passwordHash": "9088cb2ddd0107557eb9402216971823:12277c44747dd05a3835e759d3a87c869452f96d0f888af1701446ef8746083bc06fd938cd647dbc693c700a437ce7a7acf42065b26cbb4dad45f420d97fb06d",
+    "isAdmin": false,
+    "phone": "",
+    "addresses": [],
+    "createdAt": "2026-04-04T14:48:36.622Z"
   }
 ]

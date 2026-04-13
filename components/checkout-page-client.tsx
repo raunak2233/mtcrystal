@@ -31,6 +31,30 @@ const emptyAddress = {
   pincode: "",
 };
 
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => {
+      open: () => void;
+      on: (event: string, callback: (payload: { error?: { description?: string } }) => void) => void;
+    };
+  }
+}
+
+async function loadRazorpayScript() {
+  if (window.Razorpay) {
+    return true;
+  }
+
+  return new Promise<boolean>((resolve) => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
 export function CheckoutPageClient() {
   const router = useRouter();
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -176,34 +200,94 @@ export function CheckoutPageClient() {
         setAccount(accountResponse.user);
       }
 
-      const response = await apiSend<{ order: { orderNumber: string } }>(
-        "/api/orders",
-        "POST",
-        {
-          address: {
-            firstName: addressPayload.firstName,
-            lastName: addressPayload.lastName,
-            email: addressPayload.email,
-            phone: addressPayload.phone,
-            address: addressPayload.address,
-            city: addressPayload.city,
-            state: addressPayload.state,
-            pincode: addressPayload.pincode,
-          },
-          paymentMethod,
-          items: cart.map((item) => ({
-            productId: item.id,
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-            image: item.image,
-          })),
-        }
-      );
+      const requestPayload = {
+        address: {
+          firstName: addressPayload.firstName,
+          lastName: addressPayload.lastName,
+          email: addressPayload.email,
+          phone: addressPayload.phone,
+          address: addressPayload.address,
+          city: addressPayload.city,
+          state: addressPayload.state,
+          pincode: addressPayload.pincode,
+        },
+        paymentMethod,
+        items: cart.map((item) => ({
+          productId: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          image: item.image,
+        })),
+      };
 
-      clearCart();
-      toast.success("Order placed successfully");
-      router.push(`/account?tab=orders&placed=${response.order.orderNumber}`);
+      if (paymentMethod === "razorpay") {
+        const scriptLoaded = await loadRazorpayScript();
+        if (!scriptLoaded || !window.Razorpay) {
+          throw new Error("Unable to load Razorpay checkout");
+        }
+        const RazorpayCtor = window.Razorpay;
+
+        const response = await apiSend<{
+          order: { id: string; orderNumber: string };
+          checkout: {
+            key: string;
+            amount: number;
+            currency: string;
+            razorpayOrderId: string;
+            name: string;
+            description: string;
+            prefill: { name: string; email: string; contact: string };
+          };
+        }>("/api/payments/create-order", "POST", requestPayload);
+
+        await new Promise<void>((resolve, reject) => {
+          const razorpay = new RazorpayCtor({
+            key: response.checkout.key,
+            amount: response.checkout.amount,
+            currency: response.checkout.currency,
+            name: response.checkout.name,
+            description: response.checkout.description,
+            order_id: response.checkout.razorpayOrderId,
+            prefill: response.checkout.prefill,
+            handler: async (paymentResponse: Record<string, string>) => {
+              try {
+                await apiSend("/api/payments/verify", "POST", {
+                  orderId: response.order.id,
+                  razorpayOrderId: paymentResponse.razorpay_order_id,
+                  razorpayPaymentId: paymentResponse.razorpay_payment_id,
+                  razorpaySignature: paymentResponse.razorpay_signature,
+                });
+
+                clearCart();
+                toast.success("Payment successful");
+                router.push(`/account?tab=orders&placed=${response.order.orderNumber}`);
+                resolve();
+              } catch (error) {
+                reject(error);
+              }
+            },
+            theme: {
+              color: "#7c3aed",
+            },
+          });
+
+          razorpay.on("payment.failed", (failure) => {
+            reject(new Error(failure.error?.description || "Payment failed"));
+          });
+          razorpay.open();
+        });
+      } else {
+        const response = await apiSend<{ order: { orderNumber: string } }>(
+          "/api/orders",
+          "POST",
+          requestPayload
+        );
+
+        clearCart();
+        toast.success("Order placed successfully");
+        router.push(`/account?tab=orders&placed=${response.order.orderNumber}`);
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to place order");
     } finally {
@@ -400,10 +484,10 @@ export function CheckoutPageClient() {
                       Cash on Delivery
                     </Label>
                   </div>
-                  <div className="flex items-center space-x-2 rounded-lg border p-4 opacity-50">
-                    <RadioGroupItem value="card" id="card" disabled />
-                    <Label htmlFor="card" className="flex-1">
-                      Card payments coming soon
+                  <div className="flex items-center space-x-2 rounded-lg border p-4">
+                    <RadioGroupItem value="razorpay" id="razorpay" />
+                    <Label htmlFor="razorpay" className="flex-1 cursor-pointer">
+                      Razorpay
                     </Label>
                   </div>
                 </RadioGroup>

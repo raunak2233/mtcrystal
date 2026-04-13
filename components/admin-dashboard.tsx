@@ -47,13 +47,7 @@ const categoryTemplate = {
 
 const bannerTemplate = {
   id: "",
-  title: "",
-  subtitle: "",
   image: "",
-  ctaText: "",
-  ctaLink: "/products",
-  secondaryCtaText: "",
-  secondaryCtaLink: "",
 };
 
 export function AdminDashboard() {
@@ -247,6 +241,31 @@ export function AdminDashboard() {
     }
   };
 
+  const uploadBannerImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append("images", file);
+
+      const response = await apiUpload<{ imageUrls: string[] }>("/api/uploads/product-image", formData);
+      setBannerForm((current) => ({
+        ...current,
+        image: response.imageUrls[0] || current.image,
+      }));
+      toast.success("Banner image uploaded");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to upload banner image");
+    } finally {
+      event.target.value = "";
+      setUploadingImage(false);
+    }
+  };
+
   const deleteResource = async (url: string, label: string) => {
     try {
       await apiSend(url, "DELETE");
@@ -374,7 +393,7 @@ export function AdminDashboard() {
                     disabled={uploadingImage}
                   />
                   <p className="mt-2 text-sm text-gray-500">
-                    {uploadingImage ? "Uploading to /public/bracelets..." : "Upload one or multiple images. They will be saved in the same bracelets folder used now."}
+                    {uploadingImage ? "Uploading images..." : "Upload one or multiple images. The upload destination is controlled from env settings so production can use your separate image server."}
                   </p>
                 </div>
                 {galleryImages.length ? (
@@ -577,39 +596,43 @@ export function AdminDashboard() {
                   <Input id="banner-id" value={bannerForm.id} onChange={(event) => setBannerForm((current) => ({ ...current, id: event.target.value }))} />
                 </div>
                 <div>
-                  <Label htmlFor="banner-title">Title</Label>
-                  <Input id="banner-title" value={bannerForm.title} onChange={(event) => setBannerForm((current) => ({ ...current, title: event.target.value }))} required />
-                </div>
-                <div>
-                  <Label htmlFor="banner-subtitle">Subtitle</Label>
-                  <Textarea id="banner-subtitle" value={bannerForm.subtitle} onChange={(event) => setBannerForm((current) => ({ ...current, subtitle: event.target.value }))} required />
-                </div>
-                <div>
                   <Label htmlFor="banner-image">Image</Label>
                   <Input id="banner-image" value={bannerForm.image} onChange={(event) => setBannerForm((current) => ({ ...current, image: event.target.value }))} required />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label htmlFor="banner-cta-text">Primary CTA Text</Label>
-                    <Input id="banner-cta-text" value={bannerForm.ctaText} onChange={(event) => setBannerForm((current) => ({ ...current, ctaText: event.target.value }))} required />
-                  </div>
-                  <div>
-                    <Label htmlFor="banner-cta-link">Primary CTA Link</Label>
-                    <Input id="banner-cta-link" value={bannerForm.ctaLink} onChange={(event) => setBannerForm((current) => ({ ...current, ctaLink: event.target.value }))} required />
-                  </div>
+                <div>
+                  <Label htmlFor="banner-image-upload">Upload Banner Image</Label>
+                  <Input
+                    id="banner-image-upload"
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
+                    onChange={uploadBannerImage}
+                    disabled={uploadingImage}
+                  />
+                  <p className="mt-2 text-sm text-gray-500">
+                    {uploadingImage
+                      ? "Uploading image..."
+                      : "Banner images use the same upload destination as product images, including your external image server configuration."}
+                  </p>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label htmlFor="banner-secondary-text">Secondary CTA Text</Label>
-                    <Input id="banner-secondary-text" value={bannerForm.secondaryCtaText} onChange={(event) => setBannerForm((current) => ({ ...current, secondaryCtaText: event.target.value }))} />
+                {bannerForm.image ? (
+                  <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white">
+                    <img
+                      src={bannerForm.image}
+                      alt={bannerForm.id || "Banner preview"}
+                      className="h-44 w-full object-cover"
+                    />
+                    <div className="border-t border-stone-200 p-3">
+                      <p className="truncate text-xs text-stone-500">{bannerForm.image}</p>
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="banner-secondary-link">Secondary CTA Link</Label>
-                    <Input id="banner-secondary-link" value={bannerForm.secondaryCtaLink} onChange={(event) => setBannerForm((current) => ({ ...current, secondaryCtaLink: event.target.value }))} />
+                ) : (
+                  <div className="rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-6 text-center text-sm text-stone-500">
+                    <ImagePlus className="mx-auto mb-3 h-6 w-6" />
+                    Upload a banner image to preview it here.
                   </div>
-                </div>
+                )}
                 <div className="flex gap-3">
-                  <Button type="submit" className="bg-purple-600 hover:bg-purple-700" disabled={saving}>
+                  <Button type="submit" className="bg-purple-600 hover:bg-purple-700" disabled={saving || uploadingImage}>
                     {saving ? "Saving..." : "Save Banner"}
                   </Button>
                   <Button type="button" variant="outline" onClick={() => setBannerForm(bannerTemplate)}>
@@ -623,13 +646,19 @@ export function AdminDashboard() {
               {banners.map((banner) => (
                 <Card key={banner.id} className="p-5">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <h3 className="text-xl font-semibold">{banner.title}</h3>
-                      <p className="mt-2 text-sm text-gray-600">{banner.subtitle}</p>
-                      <p className="mt-2 text-sm text-gray-500">{banner.ctaText} {"->"} {banner.ctaLink}</p>
+                    <div className="flex items-start gap-4">
+                      <img
+                        src={banner.image}
+                        alt={banner.id}
+                        className="h-20 w-32 rounded-2xl object-cover"
+                      />
+                      <div>
+                        <h3 className="text-xl font-semibold">{banner.id}</h3>
+                        <p className="mt-2 text-sm text-gray-500">{banner.image}</p>
+                      </div>
                     </div>
                     <div className="flex gap-3">
-                      <Button variant="outline" onClick={() => setBannerForm({ ...banner, secondaryCtaText: banner.secondaryCtaText || "", secondaryCtaLink: banner.secondaryCtaLink || "" })}>
+                      <Button variant="outline" onClick={() => setBannerForm({ id: banner.id, image: banner.image })}>
                         Edit
                       </Button>
                       <Button variant="outline" className="text-red-600" onClick={() => deleteResource(`/api/banners/${banner.id}`, "Banner")}>

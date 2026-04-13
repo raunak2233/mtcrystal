@@ -19,7 +19,7 @@ export default function ContactPage() {
   });
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setFormData({
       ...formData,
@@ -46,7 +46,8 @@ export default function ContactPage() {
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-5xl font-bold mb-4">Contact Us</h1>
           <p className="text-xl text-purple-100 max-w-3xl mx-auto">
-            Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+            Have questions? We'd love to hear from you. Send us a message and
+            we'll respond as soon as possible.
           </p>
         </div>
       </section>
@@ -75,8 +76,8 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg mb-1">Phone</h3>
-                  <p className="text-gray-600">+91 98765 43210</p>
-                  <p className="text-gray-600">+91 98765 43211</p>
+                  <p className="text-gray-600">+91 84484 72076</p>
+                  <p className="text-gray-600">+91 84484 72076</p>
                 </div>
               </div>
             </Card>
@@ -89,8 +90,10 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-semibold text-lg mb-1">Address</h3>
                   <p className="text-gray-600">
-                    123 Crystal Lane<br />
-                    Mumbai, Maharashtra 400001<br />
+                    123 Crystal Lane
+                    <br />
+                    Mumbai, Maharashtra 400001
+                    <br />
                     India
                   </p>
                 </div>
@@ -104,7 +107,9 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg mb-1">Business Hours</h3>
-                  <p className="text-gray-600">Monday - Friday: 9:00 AM - 6:00 PM</p>
+                  <p className="text-gray-600">
+                    Monday - Friday: 9:00 AM - 6:00 PM
+                  </p>
                   <p className="text-gray-600">Saturday: 10:00 AM - 4:00 PM</p>
                   <p className="text-gray-600">Sunday: Closed</p>
                 </div>

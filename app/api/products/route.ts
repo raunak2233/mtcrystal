@@ -1,8 +1,9 @@
 import { NextRequest } from "next/server";
 import { getSessionUser } from "@/lib/server/auth";
 import { badRequest, forbidden, ok } from "@/lib/server/http";
-import { readProducts, writeProducts } from "@/lib/server/store";
+import { readCategories, readProducts, writeProducts } from "@/lib/server/store";
 import { normalizeProduct, validateProduct } from "@/lib/server/validators";
+import { findUnknownCategorySlugs } from "@/lib/server/category-guards";
 
 export async function GET() {
   const products = await readProducts();
@@ -20,6 +21,11 @@ export async function POST(request: NextRequest) {
   const validationError = validateProduct(product);
   if (validationError) {
     return badRequest(validationError);
+  }
+
+  const unknownSlugs = findUnknownCategorySlugs(product.categories, await readCategories());
+  if (unknownSlugs.length) {
+    return badRequest(`Unknown category: ${unknownSlugs.join(", ")}`);
   }
 
   const products = await readProducts();

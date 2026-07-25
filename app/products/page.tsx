@@ -1,7 +1,18 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ProductCard } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
+import {
+  DEFAULT_SORT,
+  ProductSortLinks,
+  sortProducts,
+} from "@/components/catalog-controls";
 import { readCategories, readProducts } from "@/lib/server/store";
+import {
+  buildCategoryTree,
+  categoryHref,
+  filterProductsByCategory,
+} from "@/lib/categories";
 
 export default async function ProductsPage({
   searchParams,
@@ -9,17 +20,23 @@ export default async function ProductsPage({
   searchParams: Promise<{ category?: string; search?: string; sort?: string }>;
 }) {
   const params = await searchParams;
-  const products = await readProducts();
-  const categories = await readCategories();
   const categoryParam = params.category;
   const searchParam = params.search;
-  const sortBy = params.sort || "featured";
+  const sortBy = params.sort || DEFAULT_SORT;
 
-  let filteredProducts = [...products];
-
-  if (categoryParam) {
-    filteredProducts = filteredProducts.filter((product) => product.category === categoryParam);
+  // Category browsing now lives on its own route. Keep the filter here only when
+  // it is combined with a search, so older ?category= links still land somewhere.
+  if (categoryParam && !searchParam) {
+    const query = sortBy !== DEFAULT_SORT ? `?sort=${sortBy}` : "";
+    redirect(`${categoryHref(categoryParam)}${query}`);
   }
+
+  const [products, categories] = await Promise.all([readProducts(), readCategories()]);
+  const tree = buildCategoryTree(categories);
+
+  let filteredProducts = categoryParam
+    ? filterProductsByCategory(products, categories, categoryParam)
+    : [...products];
 
   if (searchParam) {
     const query = searchParam.toLowerCase();
@@ -31,69 +48,55 @@ export default async function ProductsPage({
     );
   }
 
-  if (sortBy === "price-low") {
-    filteredProducts.sort((a, b) => a.price - b.price);
-  } else if (sortBy === "price-high") {
-    filteredProducts.sort((a, b) => b.price - a.price);
-  } else if (sortBy === "name") {
-    filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
-  }
-
-  const currentCategory = categories.find((category) => category.slug === categoryParam);
+  filteredProducts = sortProducts(filteredProducts, sortBy);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="mb-2 text-4xl font-bold">
-            {searchParam
-              ? `Search Results for "${searchParam}"`
-              : currentCategory
-                ? currentCategory.name
-                : "All Products"}
+            {searchParam ? `Search Results for "${searchParam}"` : "All Products"}
           </h1>
-          {currentCategory ? <p className="text-lg text-gray-600">{currentCategory.description}</p> : null}
           <p className="mt-2 text-gray-600">{filteredProducts.length} products found</p>
         </div>
 
-        <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <div className="flex flex-wrap gap-2">
-            <Link href="/products">
-              <Button variant={!categoryParam ? "default" : "outline"} className={!categoryParam ? "bg-purple-600" : ""}>
-                All
-              </Button>
-            </Link>
-            {categories.map((category) => (
-              <Link key={category.id} href={`/products?category=${category.slug}`}>
-                <Button variant={categoryParam === category.slug ? "default" : "outline"} className={categoryParam === category.slug ? "bg-purple-600" : ""}>
-                  {category.name}
-                </Button>
-              </Link>
-            ))}
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {[
-              { value: "featured", label: "Featured" },
-              { value: "price-low", label: "Price: Low to High" },
-              { value: "price-high", label: "Price: High to Low" },
-              { value: "name", label: "Name: A to Z" },
-            ].map((option) => {
-              const params = new URLSearchParams();
-              if (categoryParam) params.set("category", categoryParam);
-              if (searchParam) params.set("search", searchParam);
-              if (option.value !== "featured") params.set("sort", option.value);
-              const href = params.toString() ? `/products?${params.toString()}` : "/products";
-
-              return (
-                <Link key={option.value} href={href}>
-                  <Button variant={sortBy === option.value ? "default" : "outline"} className={sortBy === option.value ? "bg-purple-600" : ""}>
-                    {option.label}
+        <div className="mb-8 space-y-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">
+            Shop By Category
+          </p>
+          <div className="space-y-3">
+            {tree.map((group) => (
+              <div key={group.id} className="flex flex-wrap items-center gap-2">
+                <Link href={categoryHref(group.slug)}>
+                  <Button variant="outline" className="border-purple-200 text-purple-700">
+                    {group.name}
                   </Button>
                 </Link>
-              );
-            })}
+                {group.children.map((child) => (
+                  <Link key={child.id} href={categoryHref(child.slug)}>
+                    <Button variant="ghost" size="sm" className="text-stone-600">
+                      {child.name}
+                    </Button>
+                  </Link>
+                ))}
+              </div>
+            ))}
           </div>
+        </div>
+
+        <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+          {searchParam ? (
+            <Link href="/products">
+              <Button variant="outline">Clear Search</Button>
+            </Link>
+          ) : (
+            <span />
+          )}
+          <ProductSortLinks
+            basePath="/products"
+            currentSort={sortBy}
+            preservedParams={{ category: categoryParam, search: searchParam }}
+          />
         </div>
 
         {filteredProducts.length > 0 ? (
@@ -105,7 +108,9 @@ export default async function ProductsPage({
         ) : (
           <div className="py-16 text-center">
             <p className="mb-4 text-xl text-gray-600">No products found</p>
-            <Link href="/products"><Button>View All Products</Button></Link>
+            <Link href="/products">
+              <Button>View All Products</Button>
+            </Link>
           </div>
         )}
       </div>

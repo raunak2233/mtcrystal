@@ -2,18 +2,29 @@
 
 import { usePathname } from "next/navigation";
 import type React from "react";
-import { EcommerceHeader } from "@/components/ecommerce-header";
-import { SiteFooter } from "@/components/site-footer";
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+/**
+ * Header and footer arrive as slots so they can stay server components and read
+ * settings/categories directly, while this shell keeps the client-side rule that
+ * hides the chrome on the auth screens.
+ */
+export function AppShell({
+  header,
+  footer,
+  children,
+}: {
+  header: React.ReactNode;
+  footer: React.ReactNode;
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
   const hideChrome = pathname === "/login" || pathname === "/signup";
 
   return (
     <div className="relative flex min-h-screen flex-col">
-      {!hideChrome ? <EcommerceHeader /> : null}
+      {!hideChrome ? header : null}
       <main className="flex-1">{children}</main>
-      {!hideChrome ? <SiteFooter /> : null}
+      {!hideChrome ? footer : null}
     </div>
   );
 }

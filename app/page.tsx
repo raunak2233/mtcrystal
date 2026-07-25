@@ -4,14 +4,18 @@ import { ArrowRight, Star, Heart, Shield, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card";
 import { BannerCarousel } from "@/components/banner-carousel";
-import { readBanners, readProducts } from "@/lib/server/store";
-import testimonials from "@/data/testimonials.json";
+import { readBanners, readProducts, readTestimonials } from "@/lib/server/store";
 
 export default async function Home() {
-  const products = await readProducts();
-  const banners = await readBanners();
+  const [products, banners, allTestimonials] = await Promise.all([
+    readProducts(),
+    readBanners(),
+    readTestimonials(),
+  ]);
   const bestSellers = products.filter((product) => product.bestSeller).slice(0, 6);
   const newArrivals = products.filter((product) => product.newArrival).slice(0, 6);
+  const featured = allTestimonials.filter((testimonial) => testimonial.featured);
+  const testimonials = (featured.length ? featured : allTestimonials).slice(0, 3);
 
   return (
     <div className="flex flex-col">
@@ -60,22 +64,28 @@ export default async function Home() {
             <p className="text-lg text-gray-600">Real experiences from real people</p>
           </div>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {testimonials.slice(0, 3).map((testimonial) => (
+            {testimonials.map((testimonial) => (
               <div key={testimonial.id} className="rounded-lg bg-white p-6 shadow-md transition-shadow hover:shadow-lg">
                 <div className="mb-4 flex items-center gap-1">
-                  {[...Array(testimonial.rating)].map((_, index) => (
+                  {Array.from({ length: testimonial.rating }).map((_, index) => (
                     <Star key={index} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                   ))}
                 </div>
-                <p className="mb-4 italic text-gray-700">"{testimonial.text}"</p>
+                <p className="mb-4 italic text-gray-700">&ldquo;{testimonial.message}&rdquo;</p>
                 <div className="flex items-center gap-3">
-                  <Image
-                    src={testimonial.image}
-                    alt={testimonial.name}
-                    width={48}
-                    height={48}
-                    className="rounded-full"
-                  />
+                  {testimonial.image ? (
+                    <Image
+                      src={testimonial.image}
+                      alt={testimonial.name}
+                      width={48}
+                      height={48}
+                      className="h-12 w-12 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-purple-100 font-semibold text-purple-700">
+                      {testimonial.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <div>
                     <p className="font-semibold">{testimonial.name}</p>
                     <p className="text-sm text-gray-600">{testimonial.location}</p>

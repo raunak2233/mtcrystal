@@ -32,8 +32,11 @@ CREATE TABLE IF NOT EXISTS categories (
   name VARCHAR(255) NOT NULL,
   slug VARCHAR(255) NOT NULL UNIQUE,
   description TEXT NOT NULL,
+  parent_id VARCHAR(64) NULL,
+  sort_order INT NOT NULL DEFAULT 0,
   created_at DATETIME NOT NULL,
-  updated_at DATETIME NOT NULL
+  updated_at DATETIME NOT NULL,
+  INDEX idx_categories_parent (parent_id)
 );
 
 CREATE TABLE IF NOT EXISTS products (
@@ -69,6 +72,16 @@ CREATE TABLE IF NOT EXISTS product_bullet_points (
   CONSTRAINT fk_product_bullets_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS product_categories (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  product_id VARCHAR(64) NOT NULL,
+  category_slug VARCHAR(255) NOT NULL,
+  sort_order INT NOT NULL DEFAULT 0,
+  CONSTRAINT fk_product_categories_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+  UNIQUE KEY uniq_product_category (product_id, category_slug),
+  INDEX idx_product_categories_slug (category_slug)
+);
+
 CREATE TABLE IF NOT EXISTS banners (
   id VARCHAR(64) PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
@@ -79,6 +92,44 @@ CREATE TABLE IF NOT EXISTS banners (
   secondary_cta_text VARCHAR(255) NULL,
   secondary_cta_link VARCHAR(255) NULL,
   created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS testimonials (
+  id VARCHAR(64) PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  location VARCHAR(255) NOT NULL,
+  rating INT NOT NULL DEFAULT 5,
+  message TEXT NOT NULL,
+  product VARCHAR(255) NOT NULL,
+  image TEXT NOT NULL,
+  review_date VARCHAR(32) NOT NULL,
+  featured TINYINT(1) NOT NULL DEFAULT 0,
+  sort_order INT NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS site_settings (
+  id VARCHAR(32) PRIMARY KEY,
+  brand_tagline VARCHAR(255) NOT NULL,
+  footer_about TEXT NOT NULL,
+  contact_email VARCHAR(255) NOT NULL,
+  support_email VARCHAR(255) NOT NULL,
+  phone_primary VARCHAR(64) NOT NULL,
+  phone_secondary VARCHAR(64) NOT NULL,
+  address_line1 VARCHAR(255) NOT NULL,
+  address_line2 VARCHAR(255) NOT NULL,
+  city VARCHAR(255) NOT NULL,
+  state VARCHAR(255) NOT NULL,
+  pincode VARCHAR(32) NOT NULL,
+  country VARCHAR(255) NOT NULL,
+  business_hours TEXT NOT NULL,
+  facebook_url VARCHAR(500) NOT NULL,
+  instagram_url VARCHAR(500) NOT NULL,
+  twitter_url VARCHAR(500) NOT NULL,
+  youtube_url VARCHAR(500) NOT NULL,
+  whatsapp_url VARCHAR(500) NOT NULL,
   updated_at DATETIME NOT NULL
 );
 

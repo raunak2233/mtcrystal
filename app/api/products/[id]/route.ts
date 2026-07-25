@@ -1,8 +1,9 @@
 import { NextRequest } from "next/server";
 import { getSessionUser } from "@/lib/server/auth";
 import { badRequest, forbidden, notFound, ok } from "@/lib/server/http";
-import { readProducts, writeProducts } from "@/lib/server/store";
+import { readCategories, readProducts, writeProducts } from "@/lib/server/store";
 import { normalizeProduct, validateProduct } from "@/lib/server/validators";
+import { findUnknownCategorySlugs } from "@/lib/server/category-guards";
 
 export async function GET(_: NextRequest, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
@@ -42,6 +43,12 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
   if (validationError) {
     return badRequest(validationError);
   }
+
+  const unknownSlugs = findUnknownCategorySlugs(updatedProduct.categories, await readCategories());
+  if (unknownSlugs.length) {
+    return badRequest(`Unknown category: ${unknownSlugs.join(", ")}`);
+  }
+
   if (products.some((item, itemIndex) => item.slug === updatedProduct.slug && itemIndex !== index)) {
     return badRequest("A product with this slug already exists", 409);
   }

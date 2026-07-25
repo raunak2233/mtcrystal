@@ -9,10 +9,13 @@ import type {
   Order,
   Payment,
   Product,
+  SiteSettings,
   StoredUser,
+  Testimonial,
   UserAddress,
 } from "@/lib/types";
 import { slugify } from "@/lib/server/validators";
+import { DEFAULT_SITE_SETTINGS } from "@/lib/site-settings";
 
 const dataDir = path.join(process.cwd(), "data");
 
@@ -22,6 +25,8 @@ const storeFiles = {
   banners: path.join(dataDir, "banners.json"),
   users: path.join(dataDir, "users.json"),
   orders: path.join(dataDir, "orders.json"),
+  testimonials: path.join(dataDir, "testimonials.json"),
+  settings: path.join(dataDir, "settings.json"),
 } as const;
 
 type ProductRow = RowDataPacket & {
@@ -79,11 +84,19 @@ type AddressRow = RowDataPacket & {
   is_default: number;
 };
 
+type ProductCategoryRow = RowDataPacket & {
+  product_id: string;
+  category_slug: string;
+  sort_order: number;
+};
+
 type CategoryRow = RowDataPacket & {
   id: string;
   name: string;
   slug: string;
   description: string;
+  parent_id: string | null;
+  sort_order: number;
 };
 
 type BannerRow = RowDataPacket & {
@@ -95,6 +108,41 @@ type BannerRow = RowDataPacket & {
   cta_link: string;
   secondary_cta_text: string | null;
   secondary_cta_link: string | null;
+};
+
+type TestimonialRow = RowDataPacket & {
+  id: string;
+  name: string;
+  location: string;
+  rating: number;
+  message: string;
+  product: string;
+  image: string;
+  review_date: string;
+  featured: number;
+  sort_order: number;
+};
+
+type SiteSettingsRow = RowDataPacket & {
+  id: string;
+  brand_tagline: string;
+  footer_about: string;
+  contact_email: string;
+  support_email: string;
+  phone_primary: string;
+  phone_secondary: string;
+  address_line1: string;
+  address_line2: string;
+  city: string;
+  state: string;
+  pincode: string;
+  country: string;
+  business_hours: string;
+  facebook_url: string;
+  instagram_url: string;
+  twitter_url: string;
+  youtube_url: string;
+  whatsapp_url: string;
 };
 
 type OrderRow = RowDataPacket & {
@@ -154,6 +202,8 @@ type PaymentRow = RowDataPacket & {
   updated_at: string;
 };
 
+const SETTINGS_ROW_ID = "default";
+
 let bootstrapPromise: Promise<void> | null = null;
 
 function nowIso() {
@@ -188,10 +238,16 @@ function normalizeStoredProduct(product: Product): Product {
   const images = Array.isArray(product.images)
     ? product.images.map((value) => String(value || "").trim()).filter(Boolean)
     : [];
+  const category = String(product.category || "").trim();
+  const categories = Array.isArray(product.categories)
+    ? product.categories.map((value) => String(value || "").trim()).filter(Boolean)
+    : [];
 
   return {
     ...product,
     slug: String(product.slug || "").trim() || slugify(product.name || product.id || ""),
+    category,
+    categories: Array.from(new Set(category ? [category, ...categories] : categories)),
     image,
     images: images.length ? images : image ? [image] : [],
     bulletPoints: Array.isArray(product.bulletPoints)
@@ -231,7 +287,8 @@ function normalizeStoredUser(user: StoredUser): StoredUser {
 function hydrateProducts(
   products: ProductRow[],
   images: ProductImageRow[],
-  bulletPoints: ProductBulletRow[]
+  bulletPoints: ProductBulletRow[],
+  productCategories: ProductCategoryRow[]
 ) {
   return products.map((product) =>
     normalizeStoredProduct({
@@ -241,6 +298,10 @@ function hydrateProducts(
       description: product.description,
       shortDesc: product.short_desc,
       category: product.category,
+      categories: productCategories
+        .filter((item) => item.product_id === product.id)
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map((item) => item.category_slug),
       price: toNumber(product.price),
       image: product.image,
       images: images
@@ -297,6 +358,8 @@ function hydrateCategories(rows: CategoryRow[]): Category[] {
     name: row.name,
     slug: row.slug,
     description: row.description,
+    parentId: row.parent_id || null,
+    sortOrder: Number(row.sort_order || 0),
   }));
 }
 
@@ -311,6 +374,44 @@ function hydrateBanners(rows: BannerRow[]): Banner[] {
     secondaryCtaText: row.secondary_cta_text || "",
     secondaryCtaLink: row.secondary_cta_link || "",
   }));
+}
+
+function hydrateTestimonials(rows: TestimonialRow[]): Testimonial[] {
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    location: row.location,
+    rating: Number(row.rating || 0),
+    message: row.message,
+    product: row.product,
+    image: row.image,
+    reviewDate: row.review_date,
+    featured: Boolean(row.featured),
+    sortOrder: Number(row.sort_order || 0),
+  }));
+}
+
+function hydrateSettings(row: SiteSettingsRow): SiteSettings {
+  return {
+    brandTagline: row.brand_tagline,
+    footerAbout: row.footer_about,
+    contactEmail: row.contact_email,
+    supportEmail: row.support_email,
+    phonePrimary: row.phone_primary,
+    phoneSecondary: row.phone_secondary,
+    addressLine1: row.address_line1,
+    addressLine2: row.address_line2,
+    city: row.city,
+    state: row.state,
+    pincode: row.pincode,
+    country: row.country,
+    businessHours: row.business_hours,
+    facebookUrl: row.facebook_url,
+    instagramUrl: row.instagram_url,
+    twitterUrl: row.twitter_url,
+    youtubeUrl: row.youtube_url,
+    whatsappUrl: row.whatsapp_url,
+  };
 }
 
 function hydrateOrders(rows: OrderRow[], items: OrderItemRow[]): Order[] {
@@ -425,6 +526,13 @@ async function insertProducts(connection: PoolConnection, products: Product[]) {
         [normalized.id, bullet, index]
       );
     }
+
+    for (const [index, categorySlug] of normalized.categories.entries()) {
+      await connection.execute(
+        "INSERT INTO product_categories (product_id, category_slug, sort_order) VALUES (?, ?, ?)",
+        [normalized.id, categorySlug, index]
+      );
+    }
   }
 }
 
@@ -476,8 +584,19 @@ async function insertCategories(connection: PoolConnection, categories: Category
   const stamp = toMysqlDateTime(nowIso());
   for (const category of categories) {
     await connection.execute(
-      "INSERT INTO categories (id, name, slug, description, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
-      [category.id, category.name, category.slug, category.description, stamp, stamp]
+      `INSERT INTO categories (
+        id, name, slug, description, parent_id, sort_order, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        category.id,
+        category.name,
+        category.slug,
+        category.description,
+        category.parentId || null,
+        Number(category.sortOrder || 0),
+        stamp,
+        stamp,
+      ]
     );
   }
 }
@@ -503,6 +622,79 @@ async function insertBanners(connection: PoolConnection, banners: Banner[]) {
       ]
     );
   }
+}
+
+/**
+ * `ignoreDuplicates` is used by the seed paths only. Next prerenders pages across
+ * several worker processes, so two of them can find an empty table at the same
+ * moment and both try to seed it.
+ */
+async function insertTestimonials(
+  connection: PoolConnection,
+  testimonials: Testimonial[],
+  ignoreDuplicates = false
+) {
+  const verb = ignoreDuplicates ? "INSERT IGNORE" : "INSERT";
+  const stamp = toMysqlDateTime(nowIso());
+  for (const [index, testimonial] of testimonials.entries()) {
+    await connection.execute(
+      `${verb} INTO testimonials (
+        id, name, location, rating, message, product, image, review_date,
+        featured, sort_order, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        testimonial.id,
+        testimonial.name,
+        testimonial.location || "",
+        Number(testimonial.rating || 5),
+        testimonial.message,
+        testimonial.product || "",
+        testimonial.image || "",
+        testimonial.reviewDate || "",
+        testimonial.featured ? 1 : 0,
+        Number.isFinite(testimonial.sortOrder) ? testimonial.sortOrder : index,
+        stamp,
+        stamp,
+      ]
+    );
+  }
+}
+
+async function insertSettings(
+  connection: PoolConnection,
+  settings: SiteSettings,
+  ignoreDuplicates = false
+) {
+  await connection.execute(
+    `${ignoreDuplicates ? "INSERT IGNORE" : "INSERT"} INTO site_settings (
+      id, brand_tagline, footer_about, contact_email, support_email,
+      phone_primary, phone_secondary, address_line1, address_line2,
+      city, state, pincode, country, business_hours,
+      facebook_url, instagram_url, twitter_url, youtube_url, whatsapp_url, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      SETTINGS_ROW_ID,
+      settings.brandTagline,
+      settings.footerAbout,
+      settings.contactEmail,
+      settings.supportEmail,
+      settings.phonePrimary,
+      settings.phoneSecondary,
+      settings.addressLine1,
+      settings.addressLine2,
+      settings.city,
+      settings.state,
+      settings.pincode,
+      settings.country,
+      settings.businessHours,
+      settings.facebookUrl,
+      settings.instagramUrl,
+      settings.twitterUrl,
+      settings.youtubeUrl,
+      settings.whatsappUrl,
+      toMysqlDateTime(nowIso()),
+    ]
+  );
 }
 
 async function insertOrders(connection: PoolConnection, orders: Order[]) {
@@ -557,6 +749,51 @@ async function insertOrders(connection: PoolConnection, orders: Order[]) {
   }
 }
 
+type LegacyTestimonial = Partial<Testimonial> & { text?: string; date?: string };
+
+function normalizeSeedTestimonial(input: LegacyTestimonial, index: number): Testimonial {
+  return {
+    id: String(input.id || "").trim() || crypto.randomUUID(),
+    name: String(input.name || "").trim(),
+    location: String(input.location || "").trim(),
+    rating: Number(input.rating || 5),
+    message: String(input.message ?? input.text ?? "").trim(),
+    product: String(input.product || "").trim(),
+    image: String(input.image || "").trim(),
+    reviewDate: String(input.reviewDate ?? input.date ?? "").trim(),
+    featured: input.featured ?? index < 3,
+    sortOrder: Number.isFinite(Number(input.sortOrder)) ? Number(input.sortOrder) : index,
+  };
+}
+
+async function seedTestimonialsIfEmpty() {
+  if (await tableCount("testimonials")) {
+    return;
+  }
+
+  const seeds = await readJsonFile<LegacyTestimonial[]>(storeFiles.testimonials, []);
+  const testimonials = seeds
+    .map(normalizeSeedTestimonial)
+    .filter((testimonial) => testimonial.name && testimonial.message);
+
+  if (!testimonials.length) {
+    return;
+  }
+
+  await withTransaction((connection) => insertTestimonials(connection, testimonials, true));
+}
+
+async function seedSettingsIfMissing() {
+  if (await tableCount("site_settings")) {
+    return;
+  }
+
+  const overrides = await readJsonFile<Partial<SiteSettings>>(storeFiles.settings, {});
+  await withTransaction((connection) =>
+    insertSettings(connection, { ...DEFAULT_SITE_SETTINGS, ...overrides }, true)
+  );
+}
+
 async function maybeBootstrapFromJson() {
   await ensureDatabaseSetup();
 
@@ -569,6 +806,11 @@ async function maybeBootstrapFromJson() {
   }
 
   bootstrapPromise = (async () => {
+    // Testimonials and settings arrived after the catalog, so they seed on their
+    // own rather than being skipped because products already exist.
+    await seedTestimonialsIfEmpty();
+    await seedSettingsIfMissing();
+
     const counts = await Promise.all([
       tableCount("users"),
       tableCount("categories"),
@@ -608,18 +850,20 @@ async function ensureStoreReady() {
 
 export async function readProducts() {
   await ensureStoreReady();
-  const [products, images, bulletPoints] = await Promise.all([
+  const [products, images, bulletPoints, productCategories] = await Promise.all([
     query<ProductRow[]>("SELECT * FROM products ORDER BY created_at DESC, name ASC"),
     query<ProductImageRow[]>("SELECT * FROM product_images ORDER BY product_id ASC, sort_order ASC"),
     query<ProductBulletRow[]>("SELECT * FROM product_bullet_points ORDER BY product_id ASC, sort_order ASC"),
+    query<ProductCategoryRow[]>("SELECT * FROM product_categories ORDER BY product_id ASC, sort_order ASC"),
   ]);
 
-  return hydrateProducts(products, images, bulletPoints);
+  return hydrateProducts(products, images, bulletPoints, productCategories);
 }
 
 export async function writeProducts(products: Product[]) {
   await ensureStoreReady();
   await withTransaction(async (connection) => {
+    await connection.query("DELETE FROM product_categories");
     await connection.query("DELETE FROM product_bullet_points");
     await connection.query("DELETE FROM product_images");
     await connection.query("DELETE FROM products");
@@ -629,7 +873,9 @@ export async function writeProducts(products: Product[]) {
 
 export async function readCategories() {
   await ensureStoreReady();
-  const rows = await query<CategoryRow[]>("SELECT * FROM categories ORDER BY name ASC");
+  const rows = await query<CategoryRow[]>(
+    "SELECT * FROM categories ORDER BY sort_order ASC, name ASC"
+  );
   return hydrateCategories(rows);
 }
 
@@ -671,6 +917,39 @@ export async function writeUsers(users: StoredUser[]) {
     await connection.query("DELETE FROM user_addresses");
     await connection.query("DELETE FROM users");
     await insertUsers(connection, users);
+  });
+}
+
+export async function readTestimonials() {
+  await ensureStoreReady();
+  const rows = await query<TestimonialRow[]>(
+    "SELECT * FROM testimonials ORDER BY sort_order ASC, created_at DESC"
+  );
+  return hydrateTestimonials(rows);
+}
+
+export async function writeTestimonials(testimonials: Testimonial[]) {
+  await ensureStoreReady();
+  await withTransaction(async (connection) => {
+    await connection.query("DELETE FROM testimonials");
+    await insertTestimonials(connection, testimonials);
+  });
+}
+
+export async function readSettings(): Promise<SiteSettings> {
+  await ensureStoreReady();
+  const rows = await query<SiteSettingsRow[]>("SELECT * FROM site_settings WHERE id = ? LIMIT 1", [
+    SETTINGS_ROW_ID,
+  ]);
+
+  return rows[0] ? hydrateSettings(rows[0]) : DEFAULT_SITE_SETTINGS;
+}
+
+export async function writeSettings(settings: SiteSettings) {
+  await ensureStoreReady();
+  await withTransaction(async (connection) => {
+    await connection.query("DELETE FROM site_settings WHERE id = ?", [SETTINGS_ROW_ID]);
+    await insertSettings(connection, settings);
   });
 }
 

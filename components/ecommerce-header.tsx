@@ -24,8 +24,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Logo } from "@/components/logo";
+import { CategoryNavBar, CategoryNavMobile } from "@/components/category-nav";
 import { getCartCount } from "@/lib/cart";
-import { getCategories, getCurrentUser } from "@/lib/api-client";
+import { getCurrentUser } from "@/lib/api-client";
 import type { Category, SessionUser } from "@/lib/types";
 
 const primaryLinks = [
@@ -38,11 +39,10 @@ const primaryLinks = [
   { href: "/contact", label: "Contact" },
 ];
 
-export function EcommerceHeader() {
+export function EcommerceHeader({ categories }: { categories: Category[] }) {
   const router = useRouter();
   const [cartCount, setCartCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
-  const [categories, setCategories] = useState<Category[]>([]);
   const [user, setUser] = useState<SessionUser | null>(null);
 
   useEffect(() => {
@@ -52,22 +52,19 @@ export function EcommerceHeader() {
       setCartCount(getCartCount());
     };
 
-    const loadHeader = () => {
-      Promise.all([getCategories(), getCurrentUser()])
-        .then(([categoryResponse, userResponse]) => {
-          setCategories(categoryResponse.categories);
-          setUser(userResponse.user);
-        })
-        .catch((error) => console.error("Failed to load header data", error));
+    const loadUser = () => {
+      getCurrentUser()
+        .then((response) => setUser(response.user))
+        .catch((error) => console.error("Failed to load header user", error));
     };
 
     window.addEventListener("cartUpdated", handleCartUpdate);
-    window.addEventListener("authChanged", loadHeader);
-    loadHeader();
+    window.addEventListener("authChanged", loadUser);
+    loadUser();
 
     return () => {
       window.removeEventListener("cartUpdated", handleCartUpdate);
-      window.removeEventListener("authChanged", loadHeader);
+      window.removeEventListener("authChanged", loadUser);
     };
   }, []);
 
@@ -143,18 +140,7 @@ export function EcommerceHeader() {
                     <p className="mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">
                       Shop By Category
                     </p>
-                    <div className="flex flex-wrap gap-2">
-                      {categories.map((category) => (
-                        <SheetClose asChild key={category.id}>
-                          <Link
-                            href={`/products?category=${category.slug}`}
-                            className="rounded-full border border-stone-200 bg-white px-3 py-2 text-sm text-stone-700 transition hover:border-purple-200 hover:text-purple-700"
-                          >
-                            {category.name}
-                          </Link>
-                        </SheetClose>
-                      ))}
-                    </div>
+                    <CategoryNavMobile categories={categories} />
                   </div>
                 </div>
               </SheetContent>
@@ -240,23 +226,7 @@ export function EcommerceHeader() {
 
       <div className="hidden border-t border-stone-200 bg-purple-50/50 md:block">
         <div className="container mx-auto px-4">
-          <nav className="flex h-12 items-center justify-center gap-6 overflow-x-auto">
-            <Link
-              href="/products"
-              className="whitespace-nowrap text-sm font-medium transition-colors hover:text-purple-600"
-            >
-              All Products
-            </Link>
-            {categories.map((category) => (
-              <Link
-                key={category.id}
-                href={`/products?category=${category.slug}`}
-                className="whitespace-nowrap text-sm font-medium transition-colors hover:text-purple-600"
-              >
-                {category.name}
-              </Link>
-            ))}
-          </nav>
+          <CategoryNavBar categories={categories} />
         </div>
       </div>
     </header>

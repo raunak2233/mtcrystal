@@ -5,6 +5,8 @@ import type {
   Order,
   Product,
   SessionUser,
+  SiteSettings,
+  Testimonial,
 } from "@/lib/types";
 
 async function parseResponse<T>(response: Response): Promise<T> {
@@ -72,6 +74,14 @@ export async function getCategories() {
 
 export async function getBanners() {
   return apiGet<{ banners: Banner[] }>("/api/banners");
+}
+
+export async function getTestimonials() {
+  return apiGet<{ testimonials: Testimonial[] }>("/api/testimonials");
+}
+
+export async function getSettings() {
+  return apiGet<{ settings: SiteSettings }>("/api/settings");
 }
 
 export async function getOrders(scope: "visible" | "mine" = "visible") {

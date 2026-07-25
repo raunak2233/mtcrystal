@@ -5,7 +5,10 @@ import type {
   OrderAddress,
   OrderItem,
   Product,
+  SiteSettings,
+  Testimonial,
 } from "@/lib/types";
+import { DEFAULT_SITE_SETTINGS } from "@/lib/site-settings";
 
 export function slugify(value: string) {
   return value
@@ -30,6 +33,9 @@ export function normalizeProduct(input: Partial<Product>): Product {
   const bulletPoints = Array.isArray(input.bulletPoints)
     ? input.bulletPoints.map((value) => value.trim()).filter(Boolean)
     : [];
+  const extraCategories = Array.isArray(input.categories)
+    ? input.categories.map((value) => String(value || "").trim()).filter(Boolean)
+    : [];
 
   return {
     id: input.id?.trim() || createId(),
@@ -38,6 +44,9 @@ export function normalizeProduct(input: Partial<Product>): Product {
     description: input.description?.trim() || "",
     shortDesc: input.shortDesc?.trim() || "",
     category,
+    categories: Array.from(
+      new Set(category ? [category, ...extraCategories] : extraCategories)
+    ),
     price: Number(input.price || 0),
     image,
     images: images.length ? images : image ? [image] : [],
@@ -66,12 +75,15 @@ export function validateProduct(product: Product) {
 export function normalizeCategory(input: Partial<Category>): Category {
   const name = input.name?.trim() || "";
   const slug = slugify(input.slug || name);
+  const parentId = String(input.parentId ?? "").trim();
 
   return {
     id: input.id?.trim() || slug || createId(),
     name,
     slug,
     description: input.description?.trim() || "",
+    parentId: parentId && parentId !== "none" ? parentId : null,
+    sortOrder: Number.isFinite(Number(input.sortOrder)) ? Number(input.sortOrder) : 0,
   };
 }
 
@@ -79,6 +91,39 @@ export function validateCategory(category: Category) {
   if (!category.name) return "Category name is required";
   if (!category.slug) return "Category slug is required";
   if (!category.description) return "Category description is required";
+  if (category.parentId && category.parentId === category.id) {
+    return "A category cannot be its own parent";
+  }
+  return null;
+}
+
+/**
+ * Categories nest exactly one level: a group such as "Chakras" holds sub-categories,
+ * and those sub-categories cannot hold any of their own.
+ */
+export function validateCategoryHierarchy(
+  category: Category,
+  allCategories: Category[]
+) {
+  const children = allCategories.filter((item) => item.parentId === category.id);
+
+  if (!category.parentId) {
+    return null;
+  }
+
+  const parent = allCategories.find((item) => item.id === category.parentId);
+  if (!parent) {
+    return "The selected parent category does not exist";
+  }
+
+  if (parent.parentId) {
+    return "Sub-categories can only sit under a top-level category";
+  }
+
+  if (children.length) {
+    return "This category already has sub-categories, so it cannot become a sub-category itself";
+  }
+
   return null;
 }
 
@@ -97,6 +142,90 @@ export function normalizeBanner(input: Partial<Banner>): Banner {
 
 export function validateBanner(banner: Banner) {
   if (!banner.image) return "Banner image is required";
+  return null;
+}
+
+export function normalizeTestimonial(input: Partial<Testimonial>): Testimonial {
+  const rating = Number(input.rating);
+
+  return {
+    id: input.id?.trim() || createId(),
+    name: input.name?.trim() || "",
+    location: input.location?.trim() || "",
+    rating: Number.isFinite(rating) ? Math.min(5, Math.max(1, Math.round(rating))) : 5,
+    message: input.message?.trim() || "",
+    product: input.product?.trim() || "",
+    image: input.image?.trim() || "",
+    reviewDate: input.reviewDate?.trim() || "",
+    featured: Boolean(input.featured),
+    sortOrder: Number.isFinite(Number(input.sortOrder)) ? Number(input.sortOrder) : 0,
+  };
+}
+
+export function validateTestimonial(testimonial: Testimonial) {
+  if (!testimonial.name) return "Reviewer name is required";
+  if (!testimonial.message) return "Review text is required";
+  if (testimonial.rating < 1 || testimonial.rating > 5) return "Rating must be between 1 and 5";
+  return null;
+}
+
+export function normalizeSettings(input: Partial<SiteSettings>): SiteSettings {
+  const text = (value: unknown, fallback: string) => {
+    const trimmed = String(value ?? "").trim();
+    return trimmed || fallback;
+  };
+  const optional = (value: unknown) => String(value ?? "").trim();
+
+  return {
+    brandTagline: text(input.brandTagline, DEFAULT_SITE_SETTINGS.brandTagline),
+    footerAbout: text(input.footerAbout, DEFAULT_SITE_SETTINGS.footerAbout),
+    contactEmail: optional(input.contactEmail),
+    supportEmail: optional(input.supportEmail),
+    phonePrimary: optional(input.phonePrimary),
+    phoneSecondary: optional(input.phoneSecondary),
+    addressLine1: optional(input.addressLine1),
+    addressLine2: optional(input.addressLine2),
+    city: optional(input.city),
+    state: optional(input.state),
+    pincode: optional(input.pincode),
+    country: optional(input.country),
+    businessHours: optional(input.businessHours),
+    facebookUrl: optional(input.facebookUrl),
+    instagramUrl: optional(input.instagramUrl),
+    twitterUrl: optional(input.twitterUrl),
+    youtubeUrl: optional(input.youtubeUrl),
+    whatsappUrl: optional(input.whatsappUrl),
+  };
+}
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export function validateSettings(settings: SiteSettings) {
+  if (!settings.contactEmail) {
+    return "A contact email is required";
+  }
+
+  const emails = [settings.contactEmail, settings.supportEmail].filter(Boolean);
+  if (emails.some((email) => !EMAIL_PATTERN.test(email))) {
+    return "Please enter valid email addresses";
+  }
+
+  if (!settings.phonePrimary) {
+    return "A primary phone number is required";
+  }
+
+  const links = [
+    settings.facebookUrl,
+    settings.instagramUrl,
+    settings.twitterUrl,
+    settings.youtubeUrl,
+    settings.whatsappUrl,
+  ].filter(Boolean);
+
+  if (links.some((link) => !/^https?:\/\//i.test(link))) {
+    return "Social links must start with http:// or https://";
+  }
+
   return null;
 }
 

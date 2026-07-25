@@ -3,48 +3,64 @@
     "id": "calming",
     "name": "Calming",
     "slug": "calming",
-    "description": "Crystals that promote peace, tranquility, and stress relief"
+    "description": "Crystals that promote peace, tranquility, and stress relief",
+    "parentId": null,
+    "sortOrder": 0
   },
   {
     "id": "love",
     "name": "Love",
     "slug": "love",
-    "description": "Crystals that attract love, compassion, and emotional healing"
+    "description": "Crystals that attract love, compassion, and emotional healing",
+    "parentId": null,
+    "sortOrder": 1
   },
   {
     "id": "strength",
     "name": "Strength",
     "slug": "strength",
-    "description": "Crystals that boost confidence, endurance, and physical energy"
+    "description": "Crystals that boost confidence, endurance, and physical energy",
+    "parentId": null,
+    "sortOrder": 2
   },
   {
     "id": "wisdom",
     "name": "Wisdom",
     "slug": "wisdom",
-    "description": "Crystals that enhance clarity, intuition, and rational thought"
+    "description": "Crystals that enhance clarity, intuition, and rational thought",
+    "parentId": null,
+    "sortOrder": 3
   },
   {
     "id": "confidence",
     "name": "Confidence",
     "slug": "confidence",
-    "description": "Crystals that boost courage, willpower, and self-assurance"
+    "description": "Crystals that boost courage, willpower, and self-assurance",
+    "parentId": null,
+    "sortOrder": 4
   },
   {
     "id": "protection",
     "name": "Protection",
     "slug": "protection",
-    "description": "Crystals that shield against negativity and provide grounding"
+    "description": "Crystals that shield against negativity and provide grounding",
+    "parentId": null,
+    "sortOrder": 5
   },
   {
     "id": "prosperity",
     "name": "Prosperity",
     "slug": "prosperity",
-    "description": "Crystals that attract abundance, luck, and good fortune"
+    "description": "Crystals that attract abundance, luck, and good fortune",
+    "parentId": null,
+    "sortOrder": 6
   },
   {
     "id": "spiritual",
     "name": "Spiritual",
     "slug": "spiritual",
-    "description": "Crystals that enhance spiritual awareness and transformation"
+    "description": "Crystals that enhance spiritual awareness and transformation",
+    "parentId": null,
+    "sortOrder": 7
   }
 ]

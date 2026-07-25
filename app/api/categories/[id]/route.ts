@@ -2,7 +2,12 @@ import { NextRequest } from "next/server";
 import { getSessionUser } from "@/lib/server/auth";
 import { badRequest, forbidden, notFound, ok } from "@/lib/server/http";
 import { readCategories, readProducts, writeCategories, writeProducts } from "@/lib/server/store";
-import { normalizeCategory, validateCategory } from "@/lib/server/validators";
+import {
+  normalizeCategory,
+  validateCategory,
+  validateCategoryHierarchy,
+} from "@/lib/server/validators";
+import { getProductCategorySlugs } from "@/lib/categories";
 
 export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const user = await getSessionUser();
@@ -35,16 +40,32 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
     return badRequest("A category with this slug already exists", 409);
   }
 
-  categories[index] = updatedCategory;
-  await writeCategories(categories);
+  const nextCategories = categories.map((item) => (item.id === id ? updatedCategory : item));
+  const hierarchyError = validateCategoryHierarchy(updatedCategory, nextCategories);
+  if (hierarchyError) {
+    return badRequest(hierarchyError);
+  }
+
+  await writeCategories(nextCategories);
 
   if (previous.slug !== updatedCategory.slug) {
+    const timestamp = new Date().toISOString();
     const products = await readProducts();
-    const patchedProducts = products.map((product) =>
-      product.category === previous.slug
-        ? { ...product, category: updatedCategory.slug, updatedAt: new Date().toISOString() }
-        : product
-    );
+    const patchedProducts = products.map((product) => {
+      const slugs = getProductCategorySlugs(product);
+      if (product.category !== previous.slug && !slugs.includes(previous.slug)) {
+        return product;
+      }
+
+      return {
+        ...product,
+        category: product.category === previous.slug ? updatedCategory.slug : product.category,
+        categories: Array.from(
+          new Set(slugs.map((slug) => (slug === previous.slug ? updatedCategory.slug : slug)))
+        ),
+        updatedAt: timestamp,
+      };
+    });
     await writeProducts(patchedProducts);
   }
 
@@ -64,8 +85,12 @@ export async function DELETE(_: NextRequest, context: { params: Promise<{ id: st
     return notFound("Category not found");
   }
 
+  if (categories.some((item) => item.parentId === category.id)) {
+    return badRequest("Delete or move this category's sub-categories first");
+  }
+
   const products = await readProducts();
-  if (products.some((product) => product.category === category.slug)) {
+  if (products.some((product) => getProductCategorySlugs(product).includes(category.slug))) {
     return badRequest("Reassign products before deleting this category");
   }
 

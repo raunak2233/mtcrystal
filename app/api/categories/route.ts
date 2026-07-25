@@ -2,7 +2,11 @@ import { NextRequest } from "next/server";
 import { getSessionUser } from "@/lib/server/auth";
 import { badRequest, forbidden, ok } from "@/lib/server/http";
 import { readCategories, writeCategories } from "@/lib/server/store";
-import { normalizeCategory, validateCategory } from "@/lib/server/validators";
+import {
+  normalizeCategory,
+  validateCategory,
+  validateCategoryHierarchy,
+} from "@/lib/server/validators";
 
 export async function GET() {
   const categories = await readCategories();
@@ -24,6 +28,14 @@ export async function POST(request: NextRequest) {
   const categories = await readCategories();
   if (categories.some((item) => item.slug === category.slug)) {
     return badRequest("A category with this slug already exists", 409);
+  }
+  if (categories.some((item) => item.id === category.id)) {
+    return badRequest("A category with this id already exists", 409);
+  }
+
+  const hierarchyError = validateCategoryHierarchy(category, [...categories, category]);
+  if (hierarchyError) {
+    return badRequest(hierarchyError);
   }
 
   categories.push(category);

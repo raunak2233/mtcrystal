@@ -19,14 +19,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card";
 import { addToCart } from "@/lib/cart";
+import { categoryHref } from "@/lib/categories";
 import type { Product } from "@/lib/types";
 
 export function ProductDetailPageClient({
   product,
   relatedProducts,
+  categoryLinks = [],
 }: {
   product: Product;
   relatedProducts: Product[];
+  categoryLinks?: { name: string; slug: string }[];
 }) {
   const router = useRouter();
   const [selectedImage, setSelectedImage] = useState(0);
@@ -141,6 +144,20 @@ export function ProductDetailPageClient({
             <div>
               <h1 className="mb-2 text-3xl font-bold">{product.name}</h1>
               <p className="text-lg text-gray-600">{product.shortDesc}</p>
+              {categoryLinks.length ? (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {categoryLinks.map((category) => (
+                    <Link key={category.slug} href={categoryHref(category.slug)}>
+                      <Badge
+                        variant="outline"
+                        className="border-purple-200 bg-purple-50 text-purple-700 transition hover:bg-purple-100"
+                      >
+                        {category.name}
+                      </Badge>
+                    </Link>
+                  ))}
+                </div>
+              ) : null}
             </div>
 
             <div className="flex items-baseline gap-4">

@@ -3,6 +3,8 @@
 import { usePathname } from "next/navigation";
 import type React from "react";
 
+import { AnnouncementBar } from "@/components/announcement-bar";
+
 /**
  * Header and footer arrive as slots so they can stay server components and read
  * settings/categories directly, while this shell keeps the client-side rule that
@@ -22,8 +24,15 @@ export function AppShell({
 
   return (
     <div className="relative flex min-h-screen flex-col">
-      {!hideChrome ? header : null}
-      <main className="flex-1">{children}</main>
+      {!hideChrome ? (
+        <>
+          <AnnouncementBar />
+          {header}
+        </>
+      ) : null}
+      <main id="main-content" className="flex-1">
+        {children}
+      </main>
       {!hideChrome ? footer : null}
     </div>
   );

@@ -18,16 +18,25 @@ export const saveCart = (cart: CartItem[]): void => {
   localStorage.setItem('cart', JSON.stringify(cart));
 };
 
-export const addToCart = (product: { id: string; slug?: string; name: string; price: number; image: string }): void => {
+/**
+ * Adds a product to the cart. `quantity` is applied in one write so a "5 x"
+ * add from the product page does not fire five storage writes and five
+ * cartUpdated events.
+ */
+export const addToCart = (
+  product: { id: string; slug?: string; name: string; price: number; image: string },
+  quantity = 1
+): void => {
+  const amount = Math.max(1, Math.floor(quantity));
   const cart = getCart();
   const existingItem = cart.find(item => item.id === product.id);
-  
+
   if (existingItem) {
-    existingItem.quantity += 1;
+    existingItem.quantity += amount;
   } else {
-    cart.push({ ...product, quantity: 1 });
+    cart.push({ ...product, quantity: amount });
   }
-  
+
   saveCart(cart);
   window.dispatchEvent(new Event('cartUpdated'));
 };

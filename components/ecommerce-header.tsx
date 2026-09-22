@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/sheet";
 import { Logo } from "@/components/logo";
 import { CategoryNavBar, CategoryNavMobile } from "@/components/category-nav";
+import { CategoryStrip } from "@/components/category-strip";
 import { getCartCount } from "@/lib/cart";
 import { getCurrentUser } from "@/lib/api-client";
 import type { Category, SessionUser } from "@/lib/types";
@@ -77,8 +78,9 @@ export function EcommerceHeader({ categories }: { categories: Category[] }) {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-stone-200 bg-white/95 shadow-sm backdrop-blur">
+
       <div className="container mx-auto px-4">
-        <div className="flex h-20 items-center justify-between gap-4">
+        <div className="flex h-16 items-center justify-between gap-4 md:h-20">
           <div className="flex items-center gap-3">
             <Sheet>
               <SheetTrigger asChild>
@@ -90,7 +92,10 @@ export function EcommerceHeader({ categories }: { categories: Category[] }) {
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-[320px] border-r border-stone-200 bg-[#fbf7f1] px-0">
+              <SheetContent
+                side="left"
+                className="flex w-[320px] flex-col gap-0 border-r border-stone-200 bg-[#fbf7f1] px-0"
+              >
                 <SheetHeader className="border-b border-stone-200 px-6 pb-5 text-left">
                   <SheetTitle className="flex items-center gap-2 text-xl">
                     <Sparkles className="h-5 w-5 text-purple-600" />
@@ -101,7 +106,9 @@ export function EcommerceHeader({ categories }: { categories: Category[] }) {
                   </SheetDescription>
                 </SheetHeader>
 
-                <div className="flex h-full flex-col overflow-y-auto px-6 py-6">
+                {/* min-h-0 lets this pane shrink inside the flex column so the
+                    category list scrolls instead of overflowing past the sheet. */}
+                <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
                   <div className="space-y-2">
                     {primaryLinks.map((link) => (
                       <SheetClose asChild key={link.href}>
@@ -203,7 +210,7 @@ export function EcommerceHeader({ categories }: { categories: Category[] }) {
           </div>
         </div>
 
-        <form onSubmit={handleSearch} className="pb-4 md:hidden">
+        <form onSubmit={handleSearch} className="pb-3 md:hidden">
           <div className="relative w-full">
             <Input
               type="text"
@@ -228,6 +235,12 @@ export function EcommerceHeader({ categories }: { categories: Category[] }) {
         <div className="container mx-auto px-4">
           <CategoryNavBar categories={categories} />
         </div>
+      </div>
+
+      {/* Small screens get a swipeable top-level rail; the full tree with its
+          sub-categories stays in the slide-out menu. */}
+      <div className="border-t border-stone-200 bg-purple-50/50 md:hidden">
+        <CategoryStrip categories={categories} />
       </div>
     </header>
   );

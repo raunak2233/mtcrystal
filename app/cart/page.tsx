@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/button-link";
 import { Card } from "@/components/ui/card";
 import {
   getCart,
@@ -13,6 +14,7 @@ import {
   updateQuantity,
   type CartItem,
 } from "@/lib/cart";
+import { formatPrice } from "@/lib/format";
 
 export default function CartPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -51,12 +53,10 @@ export default function CartPage() {
           <p className="text-lg text-gray-600">
             Add some beautiful crystals to get started!
           </p>
-          <Link href="/products">
-            <Button size="lg" className="bg-purple-600 hover:bg-purple-700">
-              Shop Now
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
+          <ButtonLink href="/products" size="lg" className="bg-purple-600 hover:bg-purple-700">
+            Shop Now
+            <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
+          </ButtonLink>
         </div>
       </div>
     );
@@ -88,7 +88,7 @@ export default function CartPage() {
                       </h3>
                     </Link>
                     <p className="mt-1 font-bold text-purple-600">
-                      Rs. {item.price}
+                      {formatPrice(item.price)}
                     </p>
 
                     <div className="mt-3 flex items-center gap-4">
@@ -132,7 +132,7 @@ export default function CartPage() {
 
                   <div className="text-right">
                     <p className="text-lg font-bold">
-                      Rs. {item.price * item.quantity}
+                      {formatPrice(item.price * item.quantity)}
                     </p>
                   </div>
                 </div>
@@ -147,7 +147,7 @@ export default function CartPage() {
               <div className="mb-6 space-y-3">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal</span>
-                  <span>Rs. {total}</span>
+                  <span>{formatPrice(total)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Shipping</span>
@@ -155,22 +155,28 @@ export default function CartPage() {
                 </div>
                 <div className="flex justify-between border-t pt-3 text-xl font-bold">
                   <span>Total</span>
-                  <span className="text-purple-600">Rs. {total}</span>
+                  <span className="text-purple-600">{formatPrice(total)}</span>
                 </div>
               </div>
 
-              <Link href="/checkout">
-                <Button className="w-full bg-purple-600 hover:bg-purple-700" size="lg">
-                  Proceed to Checkout
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
+              <ButtonLink
+                href="/checkout"
+                linkClassName="block"
+                className="w-full bg-purple-600 hover:bg-purple-700"
+                size="lg"
+              >
+                Proceed to Checkout
+                <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
+              </ButtonLink>
 
-              <Link href="/products">
-                <Button variant="outline" className="mt-3 w-full">
-                  Continue Shopping
-                </Button>
-              </Link>
+              <ButtonLink
+                href="/products"
+                linkClassName="mt-3 block"
+                variant="outline"
+                className="w-full"
+              >
+                Continue Shopping
+              </ButtonLink>
 
               <div className="mt-6 space-y-2 border-t pt-6 text-sm text-gray-600">
                 <p>Free shipping on all orders</p>

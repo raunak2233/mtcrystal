@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/button-link";
 
 export const SORT_OPTIONS = [
   { value: "featured", label: "Featured" },
@@ -57,14 +56,14 @@ export function ProductSortLinks({
         const isActive = currentSort === option.value;
 
         return (
-          <Link key={option.value} href={query ? `${basePath}?${query}` : basePath}>
-            <Button
-              variant={isActive ? "default" : "outline"}
-              className={isActive ? "bg-purple-600 hover:bg-purple-700" : ""}
-            >
-              {option.label}
-            </Button>
-          </Link>
+          <ButtonLink
+            key={option.value}
+            href={query ? `${basePath}?${query}` : basePath}
+            variant={isActive ? "default" : "outline"}
+            className={isActive ? "bg-purple-600 hover:bg-purple-700" : ""}
+          >
+            {option.label}
+          </ButtonLink>
         );
       })}
     </div>

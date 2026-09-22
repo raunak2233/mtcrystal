@@ -18,6 +18,7 @@ import {
 } from "@/lib/api-client";
 import { clearCart, getCart, getCartTotal, type CartItem } from "@/lib/cart";
 import type { AccountUser, UserAddress } from "@/lib/types";
+import { formatPrice } from "@/lib/format";
 
 const emptyAddress = {
   label: "",
@@ -515,7 +516,7 @@ export function CheckoutPageClient() {
                           Qty: {item.quantity}
                         </p>
                         <p className="text-sm font-semibold text-purple-600">
-                          Rs. {item.price * item.quantity}
+                          {formatPrice(item.price * item.quantity)}
                         </p>
                       </div>
                     </div>
@@ -525,7 +526,7 @@ export function CheckoutPageClient() {
                 <div className="mb-6 space-y-3 border-t pt-6">
                   <div className="flex justify-between text-gray-600">
                     <span>Subtotal</span>
-                    <span>Rs. {total}</span>
+                    <span>{formatPrice(total)}</span>
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span>Shipping</span>
@@ -533,7 +534,7 @@ export function CheckoutPageClient() {
                   </div>
                   <div className="flex justify-between border-t pt-3 text-xl font-bold">
                     <span>Total</span>
-                    <span className="text-purple-600">Rs. {total}</span>
+                    <span className="text-purple-600">{formatPrice(total)}</span>
                   </div>
                 </div>
 

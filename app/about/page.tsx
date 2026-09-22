@@ -3,6 +3,14 @@ import Link from "next/link";
 import { Heart, Shield, Sparkles, Star, Users, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { buildPageMetadata } from "@/lib/seo";
+
+export const metadata = buildPageMetadata({
+  title: "About Miracle Touch Crystals",
+  description:
+    "Meet the team behind MT Crystals. Handcrafting authentic gemstone bracelets in India since 2017, with every piece cleansed and energised before it ships.",
+  path: "/about",
+});
 
 export default function AboutPage() {
   return (

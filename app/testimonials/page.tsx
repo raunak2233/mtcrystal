@@ -4,6 +4,14 @@ import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { readTestimonials } from "@/lib/server/store";
+import { buildPageMetadata } from "@/lib/seo";
+
+export const metadata = buildPageMetadata({
+  title: "Customer Reviews",
+  description:
+    "Real reviews from MT Crystals customers across India - what they bought, how it arrived and what changed for them.",
+  path: "/testimonials",
+});
 
 function formatReviewDate(value: string) {
   if (!value) {

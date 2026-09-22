@@ -3,6 +3,14 @@ import { Card } from "@/components/ui/card";
 import { ContactForm } from "@/components/contact-form";
 import { readSettings } from "@/lib/server/store";
 import { formatSettingsAddress } from "@/lib/site-settings";
+import { buildPageMetadata } from "@/lib/seo";
+
+export const metadata = buildPageMetadata({
+  title: "Contact Us",
+  description:
+    "Questions about sizing, stones or your order? Reach MT Crystals by phone, email or WhatsApp - we reply within a working day.",
+  path: "/contact",
+});
 
 export default async function ContactPage() {
   const settings = await readSettings();

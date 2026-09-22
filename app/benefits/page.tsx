@@ -4,6 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import benefits from "@/data/benefits.json";
+import { buildPageMetadata } from "@/lib/seo";
+
+export const metadata = buildPageMetadata({
+  title: "Crystal Healing Benefits",
+  description:
+    "What each crystal is believed to support - calm, confidence, protection, love, clarity and abundance. A plain-language guide to choosing your stone.",
+  path: "/benefits",
+});
 
 export default function BenefitsPage() {
   return (

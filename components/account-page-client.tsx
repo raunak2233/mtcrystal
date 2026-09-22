@@ -25,6 +25,7 @@ import {
   updateAccount,
 } from "@/lib/api-client";
 import type { AccountUser, Order, UserAddress } from "@/lib/types";
+import { formatPrice } from "@/lib/format";
 
 const emptyAddress = {
   id: "",
@@ -604,7 +605,7 @@ export function AccountPageClient() {
                         {order.status}
                       </p>
                       <p className="mt-1 text-sm font-semibold">
-                        Rs. {order.total}
+                        {formatPrice(order.total)}
                       </p>
                     </div>
                   </div>
@@ -618,7 +619,7 @@ export function AccountPageClient() {
                         <span>
                           {item.name} x {item.quantity}
                         </span>
-                        <span>Rs. {item.price * item.quantity}</span>
+                        <span>{formatPrice(item.price * item.quantity)}</span>
                       </div>
                     ))}
                   </div>

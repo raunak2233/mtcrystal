@@ -93,9 +93,14 @@ export function RouteProgress() {
   }
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-0 z-[100] h-0.5 bg-purple-100">
+    <div
+      role="status"
+      aria-live="polite"
+      aria-label="Loading page"
+      className="pointer-events-none fixed inset-x-0 top-0 z-[100] h-1 bg-purple-100"
+    >
       <div
-        className="h-full bg-gradient-to-r from-purple-600 to-pink-500 transition-[width] duration-200 ease-out"
+        className="h-full bg-gradient-to-r from-purple-600 to-pink-500 shadow-[0_0_10px_rgba(124,58,237,0.7)] transition-[width] duration-200 ease-out"
         style={{ width: `${progress}%` }}
       />
     </div>

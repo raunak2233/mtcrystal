@@ -241,7 +241,7 @@ export function ProductDetailPageClient({
             <div className="space-y-3">
               <h2 className="flex items-center gap-2 text-lg font-semibold">
                 <Sparkles className="h-4 w-4 text-purple-600" aria-hidden="true" />
-                Why people wear it
+                Why people love it
               </h2>
               <ul className="space-y-2">
                 {product.bulletPoints.map((point) => (

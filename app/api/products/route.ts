@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { getSessionUser } from "@/lib/server/auth";
 import { badRequest, forbidden, ok } from "@/lib/server/http";
-import { readCategories, readProducts, writeProducts } from "@/lib/server/store";
+import { createProduct, findProductConflict, readCategories, readProducts } from "@/lib/server/store";
 import { normalizeProduct, validateProduct } from "@/lib/server/validators";
 import { findUnknownCategorySlugs } from "@/lib/server/category-guards";
 
@@ -28,16 +28,15 @@ export async function POST(request: NextRequest) {
     return badRequest(`Unknown category: ${unknownSlugs.join(", ")}`);
   }
 
-  const products = await readProducts();
-  if (products.some((item) => item.id === product.id)) {
+  const conflict = await findProductConflict(product.id, product.slug);
+  if (conflict.idExists) {
     return badRequest("A product with this id already exists", 409);
   }
-  if (products.some((item) => item.slug === product.slug)) {
+  if (conflict.slugExists) {
     return badRequest("A product with this slug already exists", 409);
   }
 
   product.createdAt = new Date().toISOString();
-  products.push(product);
-  await writeProducts(products);
-  return ok({ product }, { status: 201 });
+  const created = await createProduct(product);
+  return ok({ product: created }, { status: 201 });
 }

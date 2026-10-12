@@ -536,6 +536,71 @@ async function insertProducts(connection: PoolConnection, products: Product[]) {
   }
 }
 
+async function batchInsert(
+  connection: PoolConnection,
+  baseSql: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  rows: any[][],
+  columnsPerRow: number
+) {
+  if (!rows.length) {
+    return;
+  }
+
+  const single = `(${Array(columnsPerRow).fill("?").join(", ")})`;
+  const placeholders = rows.map(() => single).join(", ");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await connection.execute(`${baseSql} VALUES ${placeholders}`, rows.flat() as any);
+}
+
+async function insertSingleProductRows(connection: PoolConnection, product: Product) {
+  const normalized = normalizeStoredProduct(product);
+  const createdAt = toMysqlDateTime(normalized.createdAt || nowIso());
+  const updatedAt = toMysqlDateTime(normalized.updatedAt || createdAt);
+
+  await connection.execute(
+    `INSERT INTO products (
+      id, slug, name, description, short_desc, category, price, image, stock,
+      featured, new_arrival, best_seller, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      normalized.id,
+      normalized.slug,
+      normalized.name,
+      normalized.description,
+      normalized.shortDesc,
+      normalized.category,
+      normalized.price,
+      normalized.image,
+      normalized.stock,
+      normalized.featured ? 1 : 0,
+      normalized.newArrival ? 1 : 0,
+      normalized.bestSeller ? 1 : 0,
+      createdAt,
+      updatedAt,
+    ]
+  );
+
+  await batchInsert(
+    connection,
+    "INSERT INTO product_images (product_id, image_url, sort_order)",
+    normalized.images.map((image, index) => [normalized.id, image, index]),
+    3
+  );
+  await batchInsert(
+    connection,
+    "INSERT INTO product_bullet_points (product_id, bullet_point, sort_order)",
+    normalized.bulletPoints.map((bullet, index) => [normalized.id, bullet, index]),
+    3
+  );
+  await batchInsert(
+    connection,
+    "INSERT INTO product_categories (product_id, category_slug, sort_order)",
+    normalized.categories.map((categorySlug, index) => [normalized.id, categorySlug, index]),
+    3
+  );
+}
+
 async function insertUsers(connection: PoolConnection, users: StoredUser[]) {
   for (const user of users.map(normalizeStoredUser)) {
     const createdAt = toMysqlDateTime(user.createdAt || nowIso());
@@ -860,6 +925,11 @@ export async function readProducts() {
   return hydrateProducts(products, images, bulletPoints, productCategories);
 }
 
+/**
+ * Full-catalog rewrite. Kept for boot/seed compatibility only — never use on a
+ * request path. It DELETEs and re-INSERTs every product row-by-row, which is
+ * what made POST /api/products take tens of seconds against remote MySQL.
+ */
 export async function writeProducts(products: Product[]) {
   await ensureStoreReady();
   await withTransaction(async (connection) => {
@@ -869,6 +939,232 @@ export async function writeProducts(products: Product[]) {
     await connection.query("DELETE FROM products");
     await insertProducts(connection, products);
   });
+}
+
+export async function findProductConflict(id: string, slug: string) {
+  await ensureStoreReady();
+  const rows = await query<RowDataPacket[]>(
+    "SELECT id, slug FROM products WHERE id = ? OR slug = ? LIMIT 2",
+    [id, slug]
+  );
+  return {
+    idExists: rows.some((row) => row.id === id),
+    slugExists: rows.some((row) => row.slug === slug),
+  };
+}
+
+export async function getProductById(id: string) {
+  await ensureStoreReady();
+  const products = await query<ProductRow[]>("SELECT * FROM products WHERE id = ? LIMIT 1", [
+    id,
+  ]);
+  if (!products.length) {
+    return null;
+  }
+
+  const [images, bulletPoints, productCategories] = await Promise.all([
+    query<ProductImageRow[]>(
+      "SELECT * FROM product_images WHERE product_id = ? ORDER BY sort_order ASC",
+      [id]
+    ),
+    query<ProductBulletRow[]>(
+      "SELECT * FROM product_bullet_points WHERE product_id = ? ORDER BY sort_order ASC",
+      [id]
+    ),
+    query<ProductCategoryRow[]>(
+      "SELECT * FROM product_categories WHERE product_id = ? ORDER BY sort_order ASC",
+      [id]
+    ),
+  ]);
+
+  const [hydrated] = hydrateProducts(products, images, bulletPoints, productCategories);
+  return hydrated || null;
+}
+
+export async function getProductsByIds(ids: string[]) {
+  const uniqueIds = Array.from(new Set(ids.filter(Boolean)));
+  if (!uniqueIds.length) {
+    return [];
+  }
+
+  await ensureStoreReady();
+  const placeholders = uniqueIds.map(() => "?").join(", ");
+  const [products, images, bulletPoints, productCategories] = await Promise.all([
+    query<ProductRow[]>(`SELECT * FROM products WHERE id IN (${placeholders})`, uniqueIds),
+    query<ProductImageRow[]>(
+      `SELECT * FROM product_images WHERE product_id IN (${placeholders}) ORDER BY product_id ASC, sort_order ASC`,
+      uniqueIds
+    ),
+    query<ProductBulletRow[]>(
+      `SELECT * FROM product_bullet_points WHERE product_id IN (${placeholders}) ORDER BY product_id ASC, sort_order ASC`,
+      uniqueIds
+    ),
+    query<ProductCategoryRow[]>(
+      `SELECT * FROM product_categories WHERE product_id IN (${placeholders}) ORDER BY product_id ASC, sort_order ASC`,
+      uniqueIds
+    ),
+  ]);
+
+  return hydrateProducts(products, images, bulletPoints, productCategories);
+}
+
+export async function createProduct(product: Product) {
+  await ensureStoreReady();
+  const normalized = normalizeStoredProduct({
+    ...product,
+    createdAt: product.createdAt || nowIso(),
+    updatedAt: nowIso(),
+  });
+
+  await withTransaction(async (connection) => {
+    await insertSingleProductRows(connection, normalized);
+  });
+
+  return normalized;
+}
+
+export async function updateProduct(id: string, product: Product) {
+  await ensureStoreReady();
+  const normalized = normalizeStoredProduct({
+    ...product,
+    id,
+    createdAt: product.createdAt || nowIso(),
+    updatedAt: nowIso(),
+  });
+  const updatedAt = toMysqlDateTime(normalized.updatedAt || nowIso());
+
+  await withTransaction(async (connection) => {
+    const [result] = (await connection.execute(
+      `UPDATE products SET
+        slug = ?, name = ?, description = ?, short_desc = ?, category = ?,
+        price = ?, image = ?, stock = ?, featured = ?, new_arrival = ?,
+        best_seller = ?, updated_at = ?
+       WHERE id = ?`,
+      [
+        normalized.slug,
+        normalized.name,
+        normalized.description,
+        normalized.shortDesc,
+        normalized.category,
+        normalized.price,
+        normalized.image,
+        normalized.stock,
+        normalized.featured ? 1 : 0,
+        normalized.newArrival ? 1 : 0,
+        normalized.bestSeller ? 1 : 0,
+        updatedAt,
+        id,
+      ]
+    )) as unknown as [{ affectedRows: number }];
+
+    if (!result.affectedRows) {
+      throw new Error("Product not found");
+    }
+
+    await connection.execute("DELETE FROM product_images WHERE product_id = ?", [id]);
+    await connection.execute("DELETE FROM product_bullet_points WHERE product_id = ?", [id]);
+    await connection.execute("DELETE FROM product_categories WHERE product_id = ?", [id]);
+
+    await batchInsert(
+      connection,
+      "INSERT INTO product_images (product_id, image_url, sort_order)",
+      normalized.images.map((image, index) => [id, image, index]),
+      3
+    );
+    await batchInsert(
+      connection,
+      "INSERT INTO product_bullet_points (product_id, bullet_point, sort_order)",
+      normalized.bulletPoints.map((bullet, index) => [id, bullet, index]),
+      3
+    );
+    await batchInsert(
+      connection,
+      "INSERT INTO product_categories (product_id, category_slug, sort_order)",
+      normalized.categories.map((categorySlug, index) => [id, categorySlug, index]),
+      3
+    );
+  });
+
+  return normalized;
+}
+
+export async function deleteProduct(id: string) {
+  await ensureStoreReady();
+  return withTransaction(async (connection) => {
+    await connection.execute("DELETE FROM product_images WHERE product_id = ?", [id]);
+    await connection.execute("DELETE FROM product_bullet_points WHERE product_id = ?", [id]);
+    await connection.execute("DELETE FROM product_categories WHERE product_id = ?", [id]);
+    const [result] = (await connection.execute("DELETE FROM products WHERE id = ?", [
+      id,
+    ])) as unknown as [{ affectedRows: number }];
+    return result.affectedRows > 0;
+  });
+}
+
+/** Atomically decrements stock for the few items in an order — O(items), not O(catalog). */
+export async function decrementProductStocks(
+  items: Array<{ productId: string; quantity: number }>,
+  updatedAtIso?: string
+) {
+  if (!items.length) {
+    return;
+  }
+
+  await ensureStoreReady();
+  const stamp = toMysqlDateTime(updatedAtIso || nowIso());
+
+  await withTransaction(async (connection) => {
+    for (const item of items) {
+      const quantity = Number(item.quantity);
+      if (!item.productId || !Number.isFinite(quantity) || quantity <= 0) {
+        throw new Error("Invalid order item");
+      }
+
+      const [result] = (await connection.execute(
+        "UPDATE products SET stock = stock - ?, updated_at = ? WHERE id = ? AND stock >= ?",
+        [quantity, stamp, item.productId, quantity]
+      )) as unknown as [{ affectedRows: number }];
+
+      if (!result.affectedRows) {
+        throw new Error("Insufficient stock for one of the items");
+      }
+    }
+  });
+}
+
+/** Renames a category slug across the catalog with 3 indexed queries. */
+export async function renameProductCategorySlug(oldSlug: string, newSlug: string) {
+  if (!oldSlug || !newSlug || oldSlug === newSlug) {
+    return;
+  }
+
+  await ensureStoreReady();
+  const stamp = toMysqlDateTime(nowIso());
+
+  await withTransaction(async (connection) => {
+    await connection.execute(
+      "UPDATE products SET updated_at = ? WHERE id IN (SELECT product_id FROM product_categories WHERE category_slug = ?)",
+      [stamp, oldSlug]
+    );
+    await connection.execute("UPDATE products SET category = ?, updated_at = ? WHERE category = ?", [
+      newSlug,
+      stamp,
+      oldSlug,
+    ]);
+    await connection.execute(
+      "UPDATE product_categories SET category_slug = ? WHERE category_slug = ?",
+      [newSlug, oldSlug]
+    );
+  });
+}
+
+export async function countProductsByCategorySlug(slug: string) {
+  await ensureStoreReady();
+  const rows = await query<RowDataPacket[]>(
+    "SELECT COUNT(*) AS count FROM product_categories WHERE category_slug = ?",
+    [slug]
+  );
+  return Number(rows[0]?.count || 0);
 }
 
 export async function readCategories() {

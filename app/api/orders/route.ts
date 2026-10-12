@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { getSessionUser } from "@/lib/server/auth";
 import { badRequest, forbidden, ok, serverError, unauthorized } from "@/lib/server/http";
-import { readOrders, readPayments, readProducts, writeOrders, writePayments, writeProducts } from "@/lib/server/store";
+import { readOrders, readPayments, decrementProductStocks, getProductsByIds, writeOrders, writePayments } from "@/lib/server/store";
 import { createId, validateOrderAddress, validateOrderItems } from "@/lib/server/validators";
 import type { OrderAddress, OrderItem } from "@/lib/types";
 
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       return badRequest("Your cart is empty or invalid");
     }
 
-    const products = await readProducts();
+    const products = await getProductsByIds(items.map((item) => item.productId));
     for (const item of items) {
       const product = products.find((productItem) => productItem.id === item.productId);
       if (!product) {
@@ -99,12 +99,6 @@ export async function POST(request: NextRequest) {
       updatedAt: now,
     };
 
-    const updatedProducts = products.map((product) => {
-      const item = items.find((orderItem) => orderItem.productId === product.id);
-      return item
-        ? { ...product, stock: product.stock - item.quantity, updatedAt: now }
-        : product;
-    });
     const orders = await readOrders();
     const payments = await readPayments();
     orders.push(order);
@@ -112,7 +106,10 @@ export async function POST(request: NextRequest) {
 
     await writeOrders(orders);
     await writePayments(payments);
-    await writeProducts(updatedProducts);
+    await decrementProductStocks(
+      items.map((item) => ({ productId: item.productId, quantity: item.quantity })),
+      now
+    );
 
     return ok({ order }, { status: 201 });
   } catch (error) {

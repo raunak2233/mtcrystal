@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { getSessionUser } from "@/lib/server/auth";
 import { badRequest, ok, serverError, unauthorized } from "@/lib/server/http";
 import { getRazorpayClient, getRazorpayConfig } from "@/lib/server/razorpay";
-import { readOrders, readPayments, readProducts, writeOrders, writePayments } from "@/lib/server/store";
+import { readOrders, readPayments, getProductsByIds, writeOrders, writePayments } from "@/lib/server/store";
 import { createId, validateOrderAddress, validateOrderItems } from "@/lib/server/validators";
 import type { OrderAddress, OrderItem } from "@/lib/types";
 
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
       return badRequest("Your cart is empty or invalid");
     }
 
-    const products = await readProducts();
+    const products = await getProductsByIds(items.map((item) => item.productId));
     for (const item of items) {
       const product = products.find((productItem) => productItem.id === item.productId);
       if (!product) {

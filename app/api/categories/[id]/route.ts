@@ -1,13 +1,12 @@
 import { NextRequest } from "next/server";
 import { getSessionUser } from "@/lib/server/auth";
 import { badRequest, forbidden, notFound, ok } from "@/lib/server/http";
-import { readCategories, readProducts, writeCategories, writeProducts } from "@/lib/server/store";
+import { countProductsByCategorySlug, readCategories, renameProductCategorySlug, writeCategories } from "@/lib/server/store";
 import {
   normalizeCategory,
   validateCategory,
   validateCategoryHierarchy,
 } from "@/lib/server/validators";
-import { getProductCategorySlugs } from "@/lib/categories";
 
 export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const user = await getSessionUser();
@@ -49,24 +48,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
   await writeCategories(nextCategories);
 
   if (previous.slug !== updatedCategory.slug) {
-    const timestamp = new Date().toISOString();
-    const products = await readProducts();
-    const patchedProducts = products.map((product) => {
-      const slugs = getProductCategorySlugs(product);
-      if (product.category !== previous.slug && !slugs.includes(previous.slug)) {
-        return product;
-      }
-
-      return {
-        ...product,
-        category: product.category === previous.slug ? updatedCategory.slug : product.category,
-        categories: Array.from(
-          new Set(slugs.map((slug) => (slug === previous.slug ? updatedCategory.slug : slug)))
-        ),
-        updatedAt: timestamp,
-      };
-    });
-    await writeProducts(patchedProducts);
+    await renameProductCategorySlug(previous.slug, updatedCategory.slug);
   }
 
   return ok({ category: updatedCategory });
@@ -89,8 +71,8 @@ export async function DELETE(_: NextRequest, context: { params: Promise<{ id: st
     return badRequest("Delete or move this category's sub-categories first");
   }
 
-  const products = await readProducts();
-  if (products.some((product) => getProductCategorySlugs(product).includes(category.slug))) {
+  const linkedCount = await countProductsByCategorySlug(category.slug);
+  if (linkedCount > 0) {
     return badRequest("Reassign products before deleting this category");
   }
 

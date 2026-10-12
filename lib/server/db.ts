@@ -107,6 +107,23 @@ async function runMigrations() {
     await getPool().query("ALTER TABLE categories ADD INDEX idx_categories_parent (parent_id)");
   }
 
+  // Single-row product/order writes depend on these; without them every
+  // WHERE product_id = ? / order_id = ? degrades to a full table scan and
+  // the long POST /api/products transaction holds locks even longer.
+  const childIndexes: Array<[string, string, string]> = [
+    ["product_images", "idx_product_images_product", "product_id"],
+    ["product_bullet_points", "idx_product_bullets_product", "product_id"],
+    ["product_categories", "idx_product_categories_product", "product_id"],
+    ["order_items", "idx_order_items_order", "order_id"],
+    ["payments", "idx_payments_order", "order_id"],
+    ["user_addresses", "idx_user_addresses_user", "user_id"],
+  ];
+  for (const [table, indexName, column] of childIndexes) {
+    if (!(await indexExists(table, indexName))) {
+      await getPool().query(`ALTER TABLE ${table} ADD INDEX ${indexName} (${column})`);
+    }
+  }
+
   // Products used to carry a single category slug. Seed the junction table from
   // that column so existing catalogs keep working after the upgrade.
   const [productCategoryCount, productCount] = await Promise.all([

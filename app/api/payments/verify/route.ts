@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { getSessionUser } from "@/lib/server/auth";
 import { badRequest, forbidden, ok, serverError, unauthorized } from "@/lib/server/http";
 import { getRazorpayClient, verifyRazorpaySignature } from "@/lib/server/razorpay";
-import { readOrders, readPayments, readProducts, writeOrders, writePayments, writeProducts } from "@/lib/server/store";
+import { readOrders, readPayments, decrementProductStocks, getProductsByIds, writeOrders, writePayments } from "@/lib/server/store";
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,10 +25,9 @@ export async function POST(request: NextRequest) {
       return badRequest("Payment signature verification failed");
     }
 
-    const [orders, payments, products] = await Promise.all([
+    const [orders, payments] = await Promise.all([
       readOrders(),
       readPayments(),
-      readProducts(),
     ]);
     const orderIndex = orders.findIndex((item) => item.id === orderId);
     if (orderIndex === -1) {
@@ -48,6 +47,7 @@ export async function POST(request: NextRequest) {
       return badRequest("Payment order mismatch");
     }
 
+    const products = await getProductsByIds(order.items.map((item) => item.productId));
     for (const item of order.items) {
       const product = products.find((productItem) => productItem.id === item.productId);
       if (!product) {
@@ -85,16 +85,12 @@ export async function POST(request: NextRequest) {
       };
     }
 
-    const updatedProducts = products.map((product) => {
-      const item = order.items.find((orderItem) => orderItem.productId === product.id);
-      return item
-        ? { ...product, stock: product.stock - item.quantity, updatedAt: paidAt }
-        : product;
-    });
-
     await writeOrders(orders);
     await writePayments(payments);
-    await writeProducts(updatedProducts);
+    await decrementProductStocks(
+      order.items.map((item) => ({ productId: item.productId, quantity: item.quantity })),
+      paidAt
+    );
 
     return ok({ order: orders[orderIndex] });
   } catch (error) {

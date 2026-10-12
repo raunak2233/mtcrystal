@@ -1,14 +1,19 @@
 import { NextRequest } from "next/server";
 import { getSessionUser } from "@/lib/server/auth";
 import { badRequest, forbidden, notFound, ok } from "@/lib/server/http";
-import { readCategories, readProducts, writeProducts } from "@/lib/server/store";
+import {
+  deleteProduct,
+  findProductConflict,
+  getProductById,
+  readCategories,
+  updateProduct,
+} from "@/lib/server/store";
 import { normalizeProduct, validateProduct } from "@/lib/server/validators";
 import { findUnknownCategorySlugs } from "@/lib/server/category-guards";
 
 export async function GET(_: NextRequest, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
-  const products = await readProducts();
-  const product = products.find((item) => item.id === id);
+  const product = await getProductById(id);
 
   if (!product) {
     return notFound("Product not found");
@@ -25,18 +30,17 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
 
   const { id } = await context.params;
   const body = await request.json();
-  const products = await readProducts();
-  const index = products.findIndex((item) => item.id === id);
+  const existing = await getProductById(id);
 
-  if (index === -1) {
+  if (!existing) {
     return notFound("Product not found");
   }
 
   const updatedProduct = normalizeProduct({
-    ...products[index],
+    ...existing,
     ...body,
     id,
-    createdAt: products[index].createdAt,
+    createdAt: existing.createdAt,
   });
 
   const validationError = validateProduct(updatedProduct);
@@ -49,13 +53,15 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
     return badRequest(`Unknown category: ${unknownSlugs.join(", ")}`);
   }
 
-  if (products.some((item, itemIndex) => item.slug === updatedProduct.slug && itemIndex !== index)) {
-    return badRequest("A product with this slug already exists", 409);
+  if (updatedProduct.slug !== existing.slug) {
+    const { slugExists } = await findProductConflict(id, updatedProduct.slug);
+    if (slugExists) {
+      return badRequest("A product with this slug already exists", 409);
+    }
   }
 
-  products[index] = updatedProduct;
-  await writeProducts(products);
-  return ok({ product: updatedProduct });
+  const saved = await updateProduct(id, updatedProduct);
+  return ok({ product: saved });
 }
 
 export async function DELETE(_: NextRequest, context: { params: Promise<{ id: string }> }) {
@@ -65,13 +71,11 @@ export async function DELETE(_: NextRequest, context: { params: Promise<{ id: st
   }
 
   const { id } = await context.params;
-  const products = await readProducts();
-  const remaining = products.filter((item) => item.id !== id);
+  const deleted = await deleteProduct(id);
 
-  if (remaining.length === products.length) {
+  if (!deleted) {
     return notFound("Product not found");
   }
 
-  await writeProducts(remaining);
   return ok({ success: true });
 }

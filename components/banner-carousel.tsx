@@ -77,6 +77,16 @@ export function BannerCarousel({ banners }: { banners: Banner[] }) {
               sizes="100vw"
             />
 
+            {!hasCopy && banner.ctaLink ? (
+              // Artwork-only banner: its CTA is baked in, so the whole slide is the link.
+              <Link
+                href={banner.ctaLink}
+                aria-label="Shop now"
+                tabIndex={active ? 0 : -1}
+                className="absolute inset-0"
+              />
+            ) : null}
+
             {hasCopy ? (
               <>
                 <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/35 to-transparent" />

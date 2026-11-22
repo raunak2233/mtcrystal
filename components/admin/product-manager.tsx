@@ -401,7 +401,10 @@ export function ProductManager({
               disabled={uploading}
               className="rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-600 px-5 text-white shadow-md hover:from-purple-700 hover:to-fuchsia-700"
             >
-              {saving ? "Saving..." : isEditing ? "Save changes" : "Publish product"}
+              {saving ? "Saving..." : isEditing ? "Save" : "Publish"}
+              {saving ? null : (
+                <span className="hidden sm:inline">&nbsp;{isEditing ? "changes" : "product"}</span>
+              )}
             </SavingButton>
           </>
         }
@@ -409,9 +412,9 @@ export function ProductManager({
         <form
           id="product-form"
           onSubmit={save}
-          className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start"
+          className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start"
         >
-          <div className="space-y-6">
+          <div className="min-w-0 space-y-6">
             <FormSection
               icon={FileText}
               tone="purple"
@@ -437,7 +440,7 @@ export function ProductManager({
                     Page link
                   </Label>
                   <div className="mt-1.5 flex items-center overflow-hidden rounded-md border border-input bg-stone-50 focus-within:ring-2 focus-within:ring-purple-300">
-                    <span className="whitespace-nowrap border-r border-stone-200 px-3 text-sm text-stone-500">
+                    <span className="shrink-0 whitespace-nowrap border-r border-stone-200 px-2.5 text-xs text-stone-500 sm:px-3 sm:text-sm">
                       /products/
                     </span>
                     <input
@@ -448,7 +451,7 @@ export function ProductManager({
                         setField("slug", toSlug(event.target.value));
                       }}
                       placeholder="amethyst-crystal-bracelet"
-                      className="h-10 w-full bg-white px-3 text-sm outline-none"
+                      className="h-10 w-full min-w-0 bg-white px-3 text-sm outline-none"
                       required
                     />
                   </div>
@@ -614,7 +617,7 @@ export function ProductManager({
             </FormSection>
           </div>
 
-          <div className="space-y-6 lg:sticky lg:top-0">
+          <div className="min-w-0 space-y-6 lg:sticky lg:top-0">
             <FormSection
               icon={ImagePlus}
               tone="sky"

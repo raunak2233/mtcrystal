@@ -39,7 +39,7 @@ export function ContactForm() {
     <Card className="p-6 sm:p-8">
       <h2 className="mb-6 text-2xl font-bold sm:text-3xl">Send us a Message</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
             <Label htmlFor="name">Name *</Label>
             <Input id="name" name="name" value={formData.name} onChange={handleInputChange} required />
@@ -57,7 +57,7 @@ export function ContactForm() {
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
             <Label htmlFor="phone">Phone</Label>
             <Input

@@ -316,7 +316,7 @@ export function CheckoutPageClient() {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="grid gap-8 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
             <div className="space-y-6 lg:col-span-2">
               <Card className="p-6">
                 <h2 className="mb-6 text-2xl font-bold">Delivery Address</h2>
@@ -376,7 +376,7 @@ export function CheckoutPageClient() {
                         placeholder="Home, Office, Gift address"
                       />
                     </div>
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div>
                         <Label htmlFor="firstName">First Name *</Label>
                         <Input
@@ -398,7 +398,7 @@ export function CheckoutPageClient() {
                         />
                       </div>
                     </div>
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div>
                         <Label htmlFor="email">Email *</Label>
                         <Input
@@ -432,7 +432,7 @@ export function CheckoutPageClient() {
                         required
                       />
                     </div>
-                    <div className="grid gap-4 md:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                       <div>
                         <Label htmlFor="city">City *</Label>
                         <Input

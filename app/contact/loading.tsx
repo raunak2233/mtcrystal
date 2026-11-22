@@ -19,7 +19,7 @@ export default function Loading() {
         </div>
         <div className="space-y-5 rounded-lg border bg-white p-8 lg:col-span-2">
           <Skeleton className="h-8 w-56" />
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <Skeleton className="h-11 w-full rounded-md" />
             <Skeleton className="h-11 w-full rounded-md" />
             <Skeleton className="h-11 w-full rounded-md" />

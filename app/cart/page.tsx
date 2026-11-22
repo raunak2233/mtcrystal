@@ -67,7 +67,7 @@ export default function CartPage() {
       <div className="container mx-auto px-4 py-8">
         <h1 className="mb-8 text-4xl font-bold">Shopping Cart</h1>
 
-        <div className="grid gap-8 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           <div className="space-y-4 lg:col-span-2">
             {cart.map((item) => (
               <Card key={item.id} className="p-4">

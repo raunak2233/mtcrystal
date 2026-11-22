@@ -136,7 +136,7 @@ export function TestimonialManager({
       />
 
       {testimonials.length ? (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {testimonials.map((testimonial) => (
             <div key={testimonial.id} className="rounded-2xl border border-stone-200 bg-white p-4">
               <div className="flex items-start gap-3">

@@ -66,9 +66,12 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   }
 
   const productSlugs = getProductCategorySlugs(product);
-  const categoryLinks = categories
-    .filter((category) => productSlugs.includes(category.slug))
-    .map((category) => ({ name: category.name, slug: category.slug }));
+  // Keep the product's own order (main category first) rather than table order,
+  // so the breadcrumb and the first chips are the categories that matter most.
+  const bySlug = new Map(categories.map((category) => [category.slug, category]));
+  const categoryLinks = [product.category, ...productSlugs]
+    .filter((slug, index, all) => all.indexOf(slug) === index && bySlug.has(slug))
+    .map((slug) => ({ name: bySlug.get(slug)!.name, slug }));
 
   // Anything sharing at least one category counts as related, so a bracelet in
   // both "Root Chakra" and "Red" surfaces neighbours from either group.

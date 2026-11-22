@@ -35,7 +35,7 @@ export default async function ContactPage() {
       </section>
 
       <div className="container mx-auto px-4 py-12 lg:py-16">
-        <div className="grid gap-8 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-1">
             {emails.length ? (
               <Card className="p-6">

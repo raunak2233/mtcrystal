@@ -115,7 +115,7 @@ export default async function ProductsPage({
             <span className="font-medium text-gray-900">Products</span>
           </nav>
 
-          <div className="grid gap-8 lg:grid-cols-[1.5fr,1fr] lg:items-end">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.5fr,1fr] lg:items-end">
             <div>
               <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-purple-600">
                 <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />

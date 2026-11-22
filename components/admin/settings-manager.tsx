@@ -89,7 +89,7 @@ export function SettingsManager({
         </SavingButton>
       </SectionHeader>
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <Panel
           title="Email"
           description="Where customers reach you. The first one shows in the footer."
@@ -159,7 +159,7 @@ export function SettingsManager({
               onChange={(event) => setField("addressLine2", event.target.value)}
             />
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <Label htmlFor="address-city">City</Label>
               <Input

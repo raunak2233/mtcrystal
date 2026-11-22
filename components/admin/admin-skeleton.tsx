@@ -16,7 +16,7 @@ export function AdminSkeleton() {
           ))}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[248px,minmax(0,1fr)]">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[248px,minmax(0,1fr)]">
           <div className="hidden lg:block">
             <div className="space-y-2 rounded-3xl bg-slate-950 p-4">
               <Skeleton className="mx-2 mb-4 h-8 w-24 bg-slate-800" />
@@ -35,7 +35,7 @@ export function AdminSkeleton() {
               <Skeleton className="h-10 w-36 rounded-md" />
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {Array.from({ length: 4 }).map((_, index) => (
                 <Skeleton key={index} className="h-28 w-full rounded-3xl" />
               ))}

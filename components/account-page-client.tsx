@@ -259,7 +259,7 @@ export function AccountPageClient() {
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.2fr,0.8fr]">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.2fr,0.8fr]">
           <Card className="p-8">
             <div className="mb-6 flex items-center gap-3">
               <User className="h-10 w-10 rounded-full bg-purple-100 p-2 text-purple-600" />
@@ -272,7 +272,7 @@ export function AccountPageClient() {
             </div>
 
             <form onSubmit={saveProfile} className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <Label htmlFor="account-name">Full Name</Label>
                   <Input
@@ -292,7 +292,7 @@ export function AccountPageClient() {
                   <Input id="account-email" value={account.email} disabled />
                 </div>
               </div>
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <Label htmlFor="account-phone">Phone</Label>
                   <Input
@@ -333,7 +333,7 @@ export function AccountPageClient() {
                 </p>
               </div>
             </div>
-            <div className="grid gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <div className="rounded-2xl border bg-white p-4">
                 <p className="text-sm text-gray-500">Total Orders</p>
                 <p className="text-2xl font-semibold">{orders.length}</p>
@@ -350,7 +350,7 @@ export function AccountPageClient() {
           </Card>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.15fr,0.85fr]">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.15fr,0.85fr]">
           <Card className="p-8">
             <div className="mb-6 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
@@ -436,7 +436,7 @@ export function AccountPageClient() {
                   placeholder="Home, Office, Gift address"
                 />
               </div>
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <Label htmlFor="firstName">First Name</Label>
                   <Input
@@ -466,7 +466,7 @@ export function AccountPageClient() {
                   />
                 </div>
               </div>
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <Label htmlFor="phone">Phone</Label>
                   <Input
@@ -510,7 +510,7 @@ export function AccountPageClient() {
                   required
                 />
               </div>
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div>
                   <Label htmlFor="city">City</Label>
                   <Input

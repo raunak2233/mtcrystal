@@ -175,7 +175,7 @@ export function AdminDashboard() {
           />
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[248px,minmax(0,1fr)]">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[248px,minmax(0,1fr)]">
           <AdminNav
             activeSection={activeSection}
             onSelect={setActiveSection}

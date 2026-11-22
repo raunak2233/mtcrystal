@@ -68,7 +68,7 @@ export function OrderManager({
         </Select>
       </SectionHeader>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Total Orders" value={stats.total} />
         <StatCard label="Pending Action" value={stats.pending} />
         <StatCard label="Shipped" value={stats.shipped} />
@@ -81,7 +81,7 @@ export function OrderManager({
           description="Orders placed on the storefront will show up here."
         />
       ) : (
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,340px),1fr]">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,340px),1fr]">
           {/* On phones the detail panel replaces the queue, so only one is shown at a time. */}
           <div className={selectedOrder ? "hidden xl:block" : "block"}>
             <div className="space-y-3">
@@ -170,7 +170,7 @@ export function OrderManager({
                   </div>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="rounded-2xl border border-stone-200 p-4">
                     <p className="text-xs uppercase tracking-[0.2em] text-stone-400">Customer</p>
                     <h4 className="mt-2 text-lg font-semibold">{selectedOrder.customerName}</h4>

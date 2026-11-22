@@ -103,7 +103,7 @@ export default async function Home() {
 
       <section className="bg-gradient-to-r from-purple-100 to-pink-100 py-16 sm:py-20">
         <div className="container mx-auto px-4">
-          <div className="grid items-center gap-12 md:grid-cols-2">
+          <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
             <div className="space-y-6">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-purple-700">
                 Our Story

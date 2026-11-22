@@ -204,7 +204,7 @@ export function ProductDetailPageClient({
               <p className="text-lg text-gray-600">{product.shortDesc}</p>
               {categoryLinks.length ? (
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {categoryLinks.map((category) => (
+                  {categoryLinks.slice(0, 6).map((category) => (
                     <Link key={category.slug} href={categoryHref(category.slug)}>
                       <Badge
                         variant="outline"

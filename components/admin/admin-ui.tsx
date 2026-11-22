@@ -200,7 +200,7 @@ export function FormSection({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
+    <section className="min-w-0 rounded-3xl border border-stone-200 bg-white p-4 shadow-sm sm:p-6">
       <div className="mb-5 flex items-start gap-3">
         <span className={`rounded-2xl p-2.5 ${sectionTones[tone]}`}>
           <Icon className="h-5 w-5" />

@@ -24,7 +24,8 @@ export function getDatabaseConfig() {
     user: process.env.MYSQL_USER || "root",
     password: process.env.MYSQL_PASSWORD || "",
     database: process.env.MYSQL_DATABASE || "mtcrystal",
-    ssl: getBoolean(process.env.MYSQL_SSL, false) ? {} : undefined,
+    // TiDB Cloud requires TLS 1.2+; set MYSQL_SSL=true for it.
+    ssl: getBoolean(process.env.MYSQL_SSL, false) ? { minVersion: "TLSv1.2" } : undefined,
   };
 }
 
@@ -120,7 +121,12 @@ async function runMigrations() {
   ];
   for (const [table, indexName, column] of childIndexes) {
     if (!(await indexExists(table, indexName))) {
-      await getPool().query(`ALTER TABLE ${table} ADD INDEX ${indexName} (${column})`);
+      // Another instance may add it between the check and the ALTER.
+      await getPool()
+        .query(`ALTER TABLE ${table} ADD INDEX ${indexName} (${column})`)
+        .catch((error) => {
+          if (error?.code !== "ER_DUP_KEYNAME") throw error;
+        });
     }
   }
 
@@ -139,14 +145,24 @@ async function runMigrations() {
   }
 }
 
-export async function ensureDatabaseSetup() {
+// Shared promise so concurrent requests run setup once; parallel DDL fails on TiDB.
+let setupPromise: Promise<void> | undefined;
+
+export function ensureDatabaseSetup() {
   if (globalThis.__mtcrystalDbInitialized) {
-    return;
+    return Promise.resolve();
   }
 
-  const schemaPath = path.join(process.cwd(), "sql", "schema.sql");
-  const schema = await fs.readFile(schemaPath, "utf8");
-  await getPool().query(schema);
-  await runMigrations();
-  globalThis.__mtcrystalDbInitialized = true;
+  setupPromise ??= (async () => {
+    const schemaPath = path.join(process.cwd(), "sql", "schema.sql");
+    const schema = await fs.readFile(schemaPath, "utf8");
+    await getPool().query(schema);
+    await runMigrations();
+    globalThis.__mtcrystalDbInitialized = true;
+  })().catch((error) => {
+    setupPromise = undefined;
+    throw error;
+  });
+
+  return setupPromise;
 }

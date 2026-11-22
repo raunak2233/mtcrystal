@@ -1,5 +1,7 @@
 import path from "path";
 import { mkdir, writeFile } from "fs/promises";
+import { randomUUID } from "crypto";
+import { AwsClient } from "aws4fetch";
 
 const LOCAL_UPLOAD_DIRECTORY = path.join(process.cwd(), "public", "bracelets");
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -30,97 +32,49 @@ function ensureAllowedImage(file: File) {
   return extension;
 }
 
-function toPublicImageUrl(value: string) {
-  if (/^https?:\/\//i.test(value)) {
-    return value;
+function getR2Config() {
+  const accountId = process.env.R2_ACCOUNT_ID?.trim();
+  const accessKeyId = process.env.R2_ACCESS_KEY_ID?.trim();
+  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY?.trim();
+  const bucket = process.env.R2_BUCKET?.trim();
+  const publicUrl = process.env.R2_PUBLIC_URL?.trim().replace(/\/+$/, "");
+  if (!accountId || !accessKeyId || !secretAccessKey || !bucket || !publicUrl) {
+    return null;
   }
-
-  const baseUrl = String(process.env.IMAGE_PUBLIC_BASE_URL || "").trim().replace(/\/+$/, "");
-  const normalizedPath = value.startsWith("/") ? value : `/${value}`;
-  return baseUrl ? `${baseUrl}${normalizedPath}` : normalizedPath;
+  return { accountId, accessKeyId, secretAccessKey, bucket, publicUrl };
 }
 
-function extractRemoteUrls(payload: unknown): string[] {
-  if (!payload || typeof payload !== "object") {
-    return [];
-  }
-
-  const record = payload as Record<string, unknown>;
-  const candidates = [
-    record.imageUrls,
-    record.images,
-    record.files,
-  ];
-
-  for (const candidate of candidates) {
-    if (Array.isArray(candidate)) {
-      const urls = candidate
-        .map((item) => {
-          if (typeof item === "string") {
-            return item;
-          }
-          if (item && typeof item === "object") {
-            const row = item as Record<string, unknown>;
-            const nested = row.url || row.imageUrl || row.path || row.location;
-            return typeof nested === "string" ? nested : "";
-          }
-          return "";
-        })
-        .filter(Boolean);
-
-      if (urls.length) {
-        return urls.map(toPublicImageUrl);
-      }
-    }
-  }
-
-  const singleValue = record.url || record.imageUrl || record.path || record.location;
-  return typeof singleValue === "string" ? [toPublicImageUrl(singleValue)] : [];
+function buildFilename(image: File, extension: string) {
+  const baseName = sanitizeFilename(path.parse(image.name || "product-image").name) || "product-image";
+  return `${baseName}-${Date.now()}-${randomUUID().slice(0, 8)}${extension}`;
 }
 
-async function uploadToRemoteServer(files: File[]) {
-  const uploadUrl = String(process.env.IMAGE_UPLOAD_API_URL || "").trim();
-  const token = String(process.env.IMAGE_UPLOAD_API_TOKEN || "").trim();
-  const fieldName = String(process.env.IMAGE_UPLOAD_FIELD_NAME || "images").trim();
-
-  if (!uploadUrl) {
-    throw new Error("IMAGE_UPLOAD_API_URL is not configured");
-  }
-
-  const formData = new FormData();
-  files.forEach((file) => formData.append(fieldName, file));
-
-  const response = await fetch(uploadUrl, {
-    method: "POST",
-    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-    body: formData,
+async function uploadToR2(files: File[], config: NonNullable<ReturnType<typeof getR2Config>>) {
+  const client = new AwsClient({
+    accessKeyId: config.accessKeyId,
+    secretAccessKey: config.secretAccessKey,
+    service: "s3",
+    region: "auto",
   });
+  const endpoint = `https://${config.accountId}.r2.cloudflarestorage.com/${config.bucket}`;
 
-  const responseText = await response.text();
-  let payload: unknown = {};
-
-  try {
-    payload = responseText ? JSON.parse(responseText) : {};
-  } catch {
-    payload = {};
-  }
-
-  if (!response.ok) {
-    throw new Error(
-      (payload as Record<string, unknown>).error as string ||
-        responseText ||
-        "Remote image server rejected upload"
-    );
-  }
-
-  const imageUrls = extractRemoteUrls(payload);
-  if (!imageUrls.length) {
-    throw new Error(
-      responseText || "Remote image server did not return an image URL"
-    );
-  }
-
-  return imageUrls;
+  return Promise.all(
+    files.map(async (image) => {
+      const key = `products/${buildFilename(image, ensureAllowedImage(image))}`;
+      const response = await client.fetch(`${endpoint}/${key}`, {
+        method: "PUT",
+        body: await image.arrayBuffer(),
+        headers: {
+          "Content-Type": image.type,
+          "Cache-Control": "public, max-age=31536000, immutable",
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`R2 upload failed (${response.status}): ${await response.text()}`);
+      }
+      return `${config.publicUrl}/${key}`;
+    })
+  );
 }
 
 async function uploadToLocalServer(files: File[]) {
@@ -129,8 +83,7 @@ async function uploadToLocalServer(files: File[]) {
 
   for (const image of files) {
     const extension = ensureAllowedImage(image);
-    const baseName = sanitizeFilename(path.parse(image.name || "product-image").name) || "product-image";
-    const filename = `${baseName}-${Date.now()}-${Math.round(Math.random() * 1000)}${extension}`;
+    const filename = buildFilename(image, extension);
     const filePath = path.join(LOCAL_UPLOAD_DIRECTORY, filename);
     const buffer = Buffer.from(await image.arrayBuffer());
     await writeFile(filePath, buffer);
@@ -143,10 +96,11 @@ async function uploadToLocalServer(files: File[]) {
 export async function uploadImages(files: File[]) {
   files.forEach(ensureAllowedImage);
 
-  const uploadUrl = String(process.env.IMAGE_UPLOAD_API_URL || "").trim();
-  if (uploadUrl) {
-    return uploadToRemoteServer(files);
+  const r2 = getR2Config();
+  if (r2) {
+    return uploadToR2(files, r2);
   }
 
+  // ponytail: local disk only works in dev; Vercel's filesystem is ephemeral.
   return uploadToLocalServer(files);
 }

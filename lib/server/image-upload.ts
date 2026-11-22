@@ -61,13 +61,23 @@ async function uploadToR2(files: File[], config: NonNullable<ReturnType<typeof g
   return Promise.all(
     files.map(async (image) => {
       const key = `products/${buildFilename(image, ensureAllowedImage(image))}`;
-      const response = await client.fetch(`${endpoint}/${key}`, {
+      const body = Buffer.from(await image.arrayBuffer());
+      // Sign only, then send the raw buffer ourselves: a signed Request object
+      // carries its body as a stream, which goes out chunked without
+      // Content-Length, and R2 rejects that with 411.
+      const signed = await client.sign(`${endpoint}/${key}`, {
         method: "PUT",
-        body: await image.arrayBuffer(),
+        body,
         headers: {
           "Content-Type": image.type,
+          "Content-Length": String(body.length),
           "Cache-Control": "public, max-age=31536000, immutable",
         },
+      });
+      const response = await fetch(signed.url, {
+        method: "PUT",
+        headers: signed.headers,
+        body,
       });
       if (!response.ok) {
         throw new Error(`R2 upload failed (${response.status}): ${await response.text()}`);

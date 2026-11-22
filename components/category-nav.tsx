@@ -13,6 +13,9 @@ import { LinkPending } from "@/components/link-pending";
 import { buildCategoryTree, categoryHref } from "@/lib/categories";
 import type { Category, CategoryNode } from "@/lib/types";
 
+/** Sub-categories shown per dropdown; the rest are one click away via "More...". */
+const MAX_VISIBLE_CHILDREN = 12;
+
 /**
  * Desktop category bar. Top-level groups with sub-categories open a dropdown on
  * hover or keyboard focus; the group itself stays clickable and lists everything
@@ -62,15 +65,7 @@ export function CategoryNavBar({ categories }: { categories: Category[] }) {
                         scrolls internally, so groups with many sub-categories are
                         fully reachable instead of being cut off by the viewport. */}
                     <div className="dropdown-scroll max-h-[min(70vh,26rem)] overflow-y-auto overscroll-contain rounded-2xl border border-stone-200 bg-white p-2 shadow-xl">
-                      <Link
-                        href={categoryHref(group.slug)}
-                        className="flex items-center rounded-xl px-3 py-2 text-sm font-semibold text-purple-700 transition-colors hover:bg-purple-50"
-                      >
-                        All {group.name}
-                        <LinkPending className="ml-1.5 inline h-3.5 w-3.5 text-purple-600" />
-                      </Link>
-                      <div className="my-1 h-px bg-stone-100" />
-                      {group.children.map((child) => (
+                      {group.children.slice(0, MAX_VISIBLE_CHILDREN).map((child) => (
                         <Link
                           key={child.id}
                           href={categoryHref(child.slug)}
@@ -84,6 +79,14 @@ export function CategoryNavBar({ categories }: { categories: Category[] }) {
                           <LinkPending className="ml-1.5 inline h-3.5 w-3.5 text-purple-600" />
                         </Link>
                       ))}
+                      <div className="my-1 h-px bg-stone-100" />
+                      <Link
+                        href={categoryHref(group.slug)}
+                        className="flex items-center rounded-xl px-3 py-2 text-sm font-semibold text-purple-700 transition-colors hover:bg-purple-50"
+                      >
+                        More...
+                        <LinkPending className="ml-1.5 inline h-3.5 w-3.5 text-purple-600" />
+                      </Link>
                     </div>
                   </div>
                 </>
@@ -102,6 +105,16 @@ export function CategoryNavBar({ categories }: { categories: Category[] }) {
             </li>
           );
         })}
+        <li className="flex items-center">
+          <Link
+            href="/products"
+            aria-current={pathname === "/products" ? "page" : undefined}
+            className="ml-2 whitespace-nowrap rounded-full bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-purple-700"
+          >
+            All Products
+            <LinkPending className="ml-1.5 inline h-3.5 w-3.5" />
+          </Link>
+        </li>
       </ul>
     </nav>
   );
@@ -139,15 +152,7 @@ export function CategoryNavMobile({ categories }: { categories: Category[] }) {
             </div>
             <CollapsibleContent>
               <div className="flex flex-wrap gap-2 border-t border-stone-100 bg-stone-50/60 px-4 py-3">
-                <SheetClose asChild>
-                  <Link
-                    href={categoryHref(group.slug)}
-                    className="rounded-full border border-purple-200 bg-white px-3 py-2 text-sm font-medium text-purple-700 transition hover:bg-purple-50"
-                  >
-                    All {group.name}
-                  </Link>
-                </SheetClose>
-                {group.children.map((child) => (
+                {group.children.slice(0, MAX_VISIBLE_CHILDREN).map((child) => (
                   <SheetClose asChild key={child.id}>
                     <Link
                       href={categoryHref(child.slug)}
@@ -157,6 +162,14 @@ export function CategoryNavMobile({ categories }: { categories: Category[] }) {
                     </Link>
                   </SheetClose>
                 ))}
+                <SheetClose asChild>
+                  <Link
+                    href={categoryHref(group.slug)}
+                    className="rounded-full border border-purple-200 bg-white px-3 py-2 text-sm font-medium text-purple-700 transition hover:bg-purple-50"
+                  >
+                    More...
+                  </Link>
+                </SheetClose>
               </div>
             </CollapsibleContent>
           </Collapsible>
@@ -172,6 +185,14 @@ export function CategoryNavMobile({ categories }: { categories: Category[] }) {
           </SheetClose>
         )
       )}
+      <SheetClose asChild>
+        <Link
+          href="/products"
+          className="flex items-center justify-center rounded-2xl bg-purple-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-purple-700"
+        >
+          All Products
+        </Link>
+      </SheetClose>
     </div>
   );
 }

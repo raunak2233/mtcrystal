@@ -7,6 +7,14 @@ import { buildCategoryTree, categoryHref, productMatchesSlugs } from "@/lib/cate
 import type { Category, Product } from "@/lib/types";
 
 /**
+ * Tiles need a photo with a backdrop; the main image is usually a white-background
+ * packshot, so use the second (styled) image when there is one.
+ */
+function sceneImage(product: Product) {
+  return product.images?.[1] || product.image;
+}
+
+/**
  * "Shop by intention" grid. Each tile borrows the first product image in the
  * group so the section stays visual without needing separate category artwork
  * that an admin would have to maintain.
@@ -20,7 +28,13 @@ export function CategoryShowcase({
   products: Product[];
   limit?: number;
 }) {
-  const tree = buildCategoryTree(categories);
+  const fullTree = buildCategoryTree(categories);
+  // "Shop by intention" means the Intention group's children when that group
+  // exists; otherwise fall back to the top-level groups.
+  const intention = fullTree.find((group) => group.slug === "intention");
+  const tree = intention?.children.length
+    ? intention.children.map((child) => ({ ...child, children: [] }))
+    : fullTree;
 
   if (!tree.length) {
     return null;
@@ -31,7 +45,7 @@ export function CategoryShowcase({
   // images already on screen keeps the grid from repeating the same bracelet,
   // and the order is derived from the data so it stays stable across renders.
   const imagePool = Array.from(
-    new Set(products.map((product) => product.image).filter(Boolean))
+    new Set(products.map(sceneImage).filter(Boolean))
   );
   const usedImages = new Set<string>();
   let fallbackCursor = 0;
@@ -58,7 +72,11 @@ export function CategoryShowcase({
   const allTiles = tree.map((group) => {
     const scope = [group.slug, ...group.children.map((child) => child.slug)];
     const matches = products.filter((product) => productMatchesSlugs(product, scope));
-    const ownImage = matches.find((product) => product.image)?.image || null;
+    // Prefer a product whose scene photo is not already on screen.
+    const ownImage =
+      matches.map(sceneImage).find((image) => image && !usedImages.has(image)) ||
+      matches.map(sceneImage).find(Boolean) ||
+      null;
     const image = ownImage || nextFallbackImage();
 
     if (image) {

@@ -1,26 +1,34 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useMemo, useState } from "react";
-import { ExternalLink, ImagePlus, Search, Star } from "lucide-react";
+import { useMemo, useState } from "react";
+import {
+  Check,
+  ExternalLink,
+  FileText,
+  ImagePlus,
+  IndianRupee,
+  LayoutGrid,
+  Loader2,
+  Search,
+  Sparkles,
+  Star,
+  Tags,
+  Upload,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
   ConfirmDeleteButton,
   EmptyState,
-  FieldGroup,
-  FormSheet,
+  FormModal,
+  FormSection,
   SavingButton,
   SectionHeader,
 } from "@/components/admin/admin-ui";
@@ -48,6 +56,13 @@ const emptyForm = {
 
 type ProductForm = typeof emptyForm;
 
+function toSlug(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+/, "");
+}
+
 export function ProductManager({
   products,
   categories,
@@ -62,6 +77,8 @@ export function ProductManager({
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [search, setSearch] = useState("");
+  // New products take their link from the name until the admin edits it.
+  const [slugTouched, setSlugTouched] = useState(false);
 
   const categoryTree = useMemo(() => buildCategoryTree(categories), [categories]);
   const categoryNameBySlug = useMemo(
@@ -83,8 +100,22 @@ export function ProductManager({
     );
   }, [products, search]);
 
+  const isEditing = Boolean(form.id) && products.some((product) => product.id === form.id);
+  const selectedCategories = Array.from(
+    new Set([form.category, ...form.categories].filter(Boolean))
+  );
+  const bulletCount = form.bulletPoints.split("\n").filter((line) => line.trim()).length;
+  const categoryLabel = (slug: string) => {
+    const category = categories.find((item) => item.slug === slug);
+    const parent = category?.parentId
+      ? categories.find((item) => item.id === category.parentId)
+      : undefined;
+    return parent ? `${parent.name} › ${category?.name}` : category?.name || slug;
+  };
+
   const openCreate = () => {
     setForm(emptyForm);
+    setSlugTouched(false);
     setFormOpen(true);
   };
 
@@ -106,11 +137,20 @@ export function ProductManager({
       newArrival: Boolean(product.newArrival),
       bestSeller: Boolean(product.bestSeller),
     });
+    setSlugTouched(true);
     setFormOpen(true);
   };
 
   const setField = <K extends keyof ProductForm>(key: K, value: ProductForm[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
+  };
+
+  const setName = (name: string) => {
+    setForm((current) => ({
+      ...current,
+      name,
+      slug: slugTouched ? current.slug : toSlug(name).replace(/-+$/, ""),
+    }));
   };
 
   const syncGallery = (images: string[], primary?: string) => {
@@ -153,20 +193,29 @@ export function ProductManager({
     }
   };
 
+  // `category` is the main one and is always part of the selection; removing it
+  // promotes the next selected category, and the first pick becomes main.
   const toggleCategory = (slug: string) => {
-    setForm((current) => ({
-      ...current,
-      categories: current.categories.includes(slug)
-        ? current.categories.filter((item) => item !== slug)
-        : [...current.categories, slug],
-    }));
+    setForm((current) => {
+      const selected = Array.from(
+        new Set([current.category, ...current.categories].filter(Boolean))
+      );
+      const next = selected.includes(slug)
+        ? selected.filter((item) => item !== slug)
+        : [...selected, slug];
+      return {
+        ...current,
+        categories: next,
+        category: next.includes(current.category) ? current.category : next[0] || "",
+      };
+    });
   };
 
   const save = async (event: React.FormEvent) => {
     event.preventDefault();
 
     if (!form.category) {
-      toast.error("Pick a primary category");
+      toast.error("Pick at least one category");
       return;
     }
     if (!form.image) {
@@ -178,6 +227,7 @@ export function ProductManager({
     try {
       const payload = {
         ...form,
+        slug: form.slug.replace(/-+$/, ""),
         price: Number(form.price),
         stock: Number(form.stock),
         bulletPoints: form.bulletPoints
@@ -187,8 +237,7 @@ export function ProductManager({
         categories: Array.from(new Set([form.category, ...form.categories].filter(Boolean))),
       };
 
-      const isExisting = Boolean(form.id) && products.some((product) => product.id === form.id);
-      if (isExisting) {
+      if (isEditing) {
         await apiSend(`/api/products/${form.id}`, "PUT", payload);
         toast.success("Product updated");
       } else {
@@ -330,14 +379,19 @@ export function ProductManager({
         />
       )}
 
-      <FormSheet
+      <FormModal
         open={formOpen}
         onOpenChange={setFormOpen}
-        title={form.id ? "Edit product" : "New product"}
-        description="Images, pricing and category placement for this product."
-        footer={
+        title={isEditing ? `Edit ${form.name || "product"}` : "Add a new product"}
+        description="Fill in the details, add photos, choose categories, then save."
+        actions={
           <>
-            <Button type="button" variant="outline" onClick={() => setFormOpen(false)}>
+            <Button
+              type="button"
+              variant="ghost"
+              className="hidden text-stone-600 sm:inline-flex"
+              onClick={() => setFormOpen(false)}
+            >
               Cancel
             </Button>
             <SavingButton
@@ -345,226 +399,375 @@ export function ProductManager({
               form="product-form"
               saving={saving}
               disabled={uploading}
-              className="bg-purple-600 hover:bg-purple-700"
+              className="rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-600 px-5 text-white shadow-md hover:from-purple-700 hover:to-fuchsia-700"
             >
-              {saving ? "Saving..." : "Save Product"}
+              {saving ? "Saving..." : isEditing ? "Save changes" : "Publish product"}
             </SavingButton>
           </>
         }
       >
-        <form id="product-form" onSubmit={save} className="space-y-6">
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="product-name">Name</Label>
-              <Input
-                id="product-name"
-                value={form.name}
-                onChange={(event) => setField("name", event.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="product-slug">URL slug</Label>
-              <Input
-                id="product-slug"
-                value={form.slug}
-                onChange={(event) => setField("slug", event.target.value)}
-                placeholder="amethyst-serenity"
-                required
-              />
-              <p className="mt-1 text-xs text-stone-500">
-                Appears in the address bar: /products/{form.slug || "your-slug"}
-              </p>
-            </div>
-            <div>
-              <Label htmlFor="product-short">Short description</Label>
-              <Input
-                id="product-short"
-                value={form.shortDesc}
-                onChange={(event) => setField("shortDesc", event.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="product-description">Full description</Label>
-              <Textarea
-                id="product-description"
-                rows={4}
-                value={form.description}
-                onChange={(event) => setField("description", event.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="product-price">Price (Rs.)</Label>
-              <Input
-                id="product-price"
-                type="number"
-                min="0"
-                value={form.price}
-                onChange={(event) => setField("price", event.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="product-stock">Stock</Label>
-              <Input
-                id="product-stock"
-                type="number"
-                min="0"
-                value={form.stock}
-                onChange={(event) => setField("stock", event.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <FieldGroup label="Images" hint="The first image, or the one you mark Primary, is used on cards.">
-            <Input
-              type="file"
-              accept="image/png,image/jpeg,image/webp,image/gif"
-              multiple
-              onChange={uploadImages}
-              disabled={uploading}
-            />
-            {uploading ? <p className="text-xs text-stone-500">Uploading...</p> : null}
-
-            {form.images.length ? (
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                {form.images.map((image) => (
-                  <div key={image} className="overflow-hidden rounded-xl border border-stone-200">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={image} alt="Product" className="h-24 w-full object-cover" />
-                    <div className="flex gap-1 p-2">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant={form.image === image ? "default" : "outline"}
-                        className={`flex-1 text-xs ${
-                          form.image === image ? "bg-purple-600 hover:bg-purple-700" : ""
-                        }`}
-                        onClick={() => syncGallery(form.images, image)}
-                      >
-                        {form.image === image ? "Primary" : "Set primary"}
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        className="text-red-600"
-                        onClick={() =>
-                          syncGallery(form.images.filter((item) => item !== image))
-                        }
-                      >
-                        Remove
-                      </Button>
-                    </div>
+        <form
+          id="product-form"
+          onSubmit={save}
+          className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start"
+        >
+          <div className="space-y-6">
+            <FormSection
+              icon={FileText}
+              tone="purple"
+              title="Basic details"
+              hint="What customers see first on the product card and page."
+            >
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="product-name" className="text-stone-700">
+                    Product name
+                  </Label>
+                  <Input
+                    id="product-name"
+                    value={form.name}
+                    onChange={(event) => setName(event.target.value)}
+                    placeholder="e.g. Amethyst Crystal Bracelet"
+                    className="mt-1.5 h-11 text-base"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="product-slug" className="text-stone-700">
+                    Page link
+                  </Label>
+                  <div className="mt-1.5 flex items-center overflow-hidden rounded-md border border-input bg-stone-50 focus-within:ring-2 focus-within:ring-purple-300">
+                    <span className="whitespace-nowrap border-r border-stone-200 px-3 text-sm text-stone-500">
+                      /products/
+                    </span>
+                    <input
+                      id="product-slug"
+                      value={form.slug}
+                      onChange={(event) => {
+                        setSlugTouched(true);
+                        setField("slug", toSlug(event.target.value));
+                      }}
+                      placeholder="amethyst-crystal-bracelet"
+                      className="h-10 w-full bg-white px-3 text-sm outline-none"
+                      required
+                    />
                   </div>
-                ))}
+                  <p className="mt-1 text-xs text-stone-500">
+                    Filled in from the name. Change it only if you need a different link.
+                  </p>
+                </div>
+                <div>
+                  <Label htmlFor="product-short" className="text-stone-700">
+                    Subtitle
+                  </Label>
+                  <Input
+                    id="product-short"
+                    value={form.shortDesc}
+                    onChange={(event) => setField("shortDesc", event.target.value)}
+                    placeholder="e.g. Natural gemstone beads for peace and intuition"
+                    className="mt-1.5"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="product-description" className="text-stone-700">
+                    Full description
+                  </Label>
+                  <Textarea
+                    id="product-description"
+                    rows={6}
+                    value={form.description}
+                    onChange={(event) => setField("description", event.target.value)}
+                    placeholder="Tell the story of the stone, how it feels to wear, and who it is for."
+                    className="mt-1.5"
+                    required
+                  />
+                </div>
               </div>
-            ) : (
-              <div className="rounded-xl border border-dashed border-stone-300 bg-stone-50 p-6 text-center text-sm text-stone-500">
-                <ImagePlus className="mx-auto mb-2 h-5 w-5" />
-                No images yet
-              </div>
-            )}
-          </FieldGroup>
+            </FormSection>
 
-          <FieldGroup label="Primary category">
-            <Select value={form.category} onValueChange={(value) => setField("category", value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categoryTree.map((group) => (
-                  <Fragment key={group.id}>
-                    <SelectItem value={group.slug}>{group.name}</SelectItem>
-                    {group.children.map((child) => (
-                      <SelectItem key={child.id} value={child.slug}>
-                        {group.name} › {child.name}
-                      </SelectItem>
-                    ))}
-                  </Fragment>
-                ))}
-              </SelectContent>
-            </Select>
-          </FieldGroup>
+            <FormSection
+              icon={Sparkles}
+              tone="pink"
+              title="Why people love it"
+              hint="One benefit per line. Each line becomes a bullet point."
+              aside={
+                bulletCount ? (
+                  <span className="rounded-full bg-pink-50 px-2.5 py-1 text-xs font-medium text-pink-700">
+                    {bulletCount} {bulletCount === 1 ? "point" : "points"}
+                  </span>
+                ) : null
+              }
+            >
+              <Textarea
+                id="product-bullets"
+                rows={5}
+                value={form.bulletPoints}
+                onChange={(event) => setField("bulletPoints", event.target.value)}
+                placeholder={"Natural amethyst beads\nCalming everyday energy\nStretch fit for most wrists"}
+              />
+            </FormSection>
 
-          <FieldGroup
-            label="Also show in"
-            hint="Tick every other category this product belongs to."
-          >
-            <div className="space-y-3">
-              {categoryTree.map((group) => (
-                <div key={group.id} className="rounded-xl border border-stone-200 p-3">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-stone-500">
-                    {group.name}
+            <FormSection
+              icon={Tags}
+              tone="fuchsia"
+              title="Categories"
+              hint="Pick every category this product belongs to. The starred one is the main category."
+            >
+              {selectedCategories.length ? (
+                <div className="mb-5 rounded-2xl border border-purple-100 bg-purple-50/60 p-3">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-purple-700">
+                    Selected ({selectedCategories.length})
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    {[group, ...group.children].map((category) => {
-                      const isPrimary = form.category === category.slug;
-                      const isSelected = isPrimary || form.categories.includes(category.slug);
-
+                    {selectedCategories.map((slug) => {
+                      const isPrimary = form.category === slug;
                       return (
-                        <button
-                          key={category.id}
-                          type="button"
-                          disabled={isPrimary}
-                          onClick={() => toggleCategory(category.slug)}
-                          className={`rounded-full border px-3 py-1.5 text-sm transition disabled:opacity-70 ${
-                            isSelected
-                              ? "border-purple-300 bg-purple-50 text-purple-700"
-                              : "border-stone-200 bg-white text-stone-700 hover:border-purple-200"
+                        <span
+                          key={slug}
+                          className={`inline-flex items-center gap-1 rounded-full border py-1 pl-1.5 pr-1 text-sm ${
+                            isPrimary
+                              ? "border-amber-300 bg-amber-50 text-amber-800"
+                              : "border-purple-200 bg-white text-purple-800"
                           }`}
                         >
-                          {category.id === group.id ? `All ${category.name}` : category.name}
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() => setField("category", slug)}
+                            title={isPrimary ? "Main category" : "Make this the main category"}
+                            className="rounded-full p-0.5 transition hover:bg-amber-100"
+                          >
+                            <Star
+                              className={`h-3.5 w-3.5 ${
+                                isPrimary ? "fill-amber-400 text-amber-500" : "text-stone-300"
+                              }`}
+                            />
+                          </button>
+                          {categoryLabel(slug)}
+                          <button
+                            type="button"
+                            onClick={() => toggleCategory(slug)}
+                            aria-label={`Remove ${categoryLabel(slug)}`}
+                            className="rounded-full p-0.5 text-stone-400 transition hover:bg-red-50 hover:text-red-600"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </span>
                       );
                     })}
                   </div>
                 </div>
-              ))}
-            </div>
-          </FieldGroup>
+              ) : (
+                <p className="mb-5 rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-3 text-sm text-stone-500">
+                  Nothing selected yet. The first category you pick becomes the main one.
+                </p>
+              )}
 
-          <div>
-            <Label htmlFor="product-bullets">Benefits</Label>
-            <Textarea
-              id="product-bullets"
-              rows={4}
-              value={form.bulletPoints}
-              onChange={(event) => setField("bulletPoints", event.target.value)}
-              placeholder="One benefit per line"
-            />
+              <Tabs defaultValue={categoryTree[0]?.id}>
+                <TabsList className="flex h-auto flex-wrap justify-start gap-1 bg-stone-100 p-1">
+                  {categoryTree.map((group) => {
+                    const count = [group, ...group.children].filter((category) =>
+                      selectedCategories.includes(category.slug)
+                    ).length;
+                    return (
+                      <TabsTrigger
+                        key={group.id}
+                        value={group.id}
+                        className="gap-1.5 data-[state=active]:bg-white data-[state=active]:text-purple-700"
+                      >
+                        {group.name}
+                        {count ? (
+                          <span className="rounded-full bg-purple-600 px-1.5 text-[10px] font-semibold leading-4 text-white">
+                            {count}
+                          </span>
+                        ) : null}
+                      </TabsTrigger>
+                    );
+                  })}
+                </TabsList>
+                {categoryTree.map((group) => (
+                  <TabsContent key={group.id} value={group.id} className="mt-4">
+                    <div className="flex flex-wrap gap-2">
+                      {(group.children.length ? group.children : [group]).map((category) => {
+                        const selected = selectedCategories.includes(category.slug);
+                        return (
+                          <button
+                            key={category.id}
+                            type="button"
+                            onClick={() => toggleCategory(category.slug)}
+                            aria-pressed={selected}
+                            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition ${
+                              selected
+                                ? "border-purple-600 bg-purple-600 text-white shadow-sm"
+                                : "border-stone-200 bg-white text-stone-700 hover:border-purple-300 hover:bg-purple-50"
+                            }`}
+                          >
+                            {selected ? <Check className="h-3.5 w-3.5" /> : null}
+                            {category.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </TabsContent>
+                ))}
+              </Tabs>
+            </FormSection>
           </div>
 
-          <FieldGroup label="Placement">
-            <div className="space-y-3">
-              {(
-                [
-                  ["featured", "Featured"],
-                  ["newArrival", "Show in New Arrivals"],
-                  ["bestSeller", "Show in Best Sellers"],
-                ] as const
-              ).map(([key, label]) => (
-                <div key={key} className="flex items-center justify-between">
-                  <Label htmlFor={`product-${key}`} className="font-normal">
-                    {label}
+          <div className="space-y-6 lg:sticky lg:top-0">
+            <FormSection
+              icon={ImagePlus}
+              tone="sky"
+              title="Photos"
+              hint="The starred photo is shown on product cards."
+            >
+              <label
+                className={`flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-4 py-6 text-center transition ${
+                  uploading
+                    ? "border-sky-300 bg-sky-50"
+                    : "border-sky-200 bg-sky-50/50 hover:border-sky-400 hover:bg-sky-50"
+                }`}
+              >
+                {uploading ? (
+                  <Loader2 className="mb-2 h-6 w-6 animate-spin text-sky-600" />
+                ) : (
+                  <Upload className="mb-2 h-6 w-6 text-sky-600" />
+                )}
+                <span className="text-sm font-medium text-sky-800">
+                  {uploading ? "Uploading..." : "Click to upload photos"}
+                </span>
+                <span className="mt-0.5 text-xs text-sky-700/70">
+                  JPG, PNG, WEBP or GIF, up to 5 MB each
+                </span>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                  multiple
+                  onChange={uploadImages}
+                  disabled={uploading}
+                  className="sr-only"
+                />
+              </label>
+
+              {form.images.length ? (
+                <div className="mt-4 grid grid-cols-3 gap-2">
+                  {form.images.map((image) => {
+                    const isPrimary = form.image === image;
+                    return (
+                      <div
+                        key={image}
+                        className={`relative aspect-square overflow-hidden rounded-xl border-2 ${
+                          isPrimary ? "border-amber-400" : "border-transparent"
+                        }`}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={image} alt="" className="h-full w-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => syncGallery(form.images, image)}
+                          title={isPrimary ? "Main photo" : "Make main photo"}
+                          className="absolute left-1 top-1 rounded-full bg-white/90 p-1 shadow-sm"
+                        >
+                          <Star
+                            className={`h-3.5 w-3.5 ${
+                              isPrimary ? "fill-amber-400 text-amber-500" : "text-stone-400"
+                            }`}
+                          />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => syncGallery(form.images.filter((item) => item !== image))}
+                          aria-label="Remove photo"
+                          className="absolute right-1 top-1 rounded-full bg-white/90 p-1 text-stone-500 shadow-sm transition hover:text-red-600"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </FormSection>
+
+            <FormSection icon={IndianRupee} tone="emerald" title="Price & stock">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="product-price" className="text-stone-700">
+                    Price
                   </Label>
-                  <Switch
-                    id={`product-${key}`}
-                    checked={form[key]}
-                    onCheckedChange={(checked) => setField(key, checked)}
+                  <div className="relative mt-1.5">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-stone-500">
+                      ₹
+                    </span>
+                    <Input
+                      id="product-price"
+                      type="number"
+                      min="0"
+                      value={form.price}
+                      onChange={(event) => setField("price", event.target.value)}
+                      className="pl-7 text-base font-semibold"
+                      required
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="product-stock" className="text-stone-700">
+                    In stock
+                  </Label>
+                  <Input
+                    id="product-stock"
+                    type="number"
+                    min="0"
+                    value={form.stock}
+                    onChange={(event) => setField("stock", event.target.value)}
+                    className="mt-1.5 text-base"
+                    required
                   />
                 </div>
-              ))}
-            </div>
-          </FieldGroup>
+              </div>
+              {Number(form.stock) === 0 ? (
+                <p className="mt-2 text-xs font-medium text-red-600">
+                  Stock is 0, so this product will show as out of stock.
+                </p>
+              ) : null}
+            </FormSection>
+
+            <FormSection
+              icon={LayoutGrid}
+              tone="amber"
+              title="Home page placement"
+              hint="Choose where this product is highlighted."
+            >
+              <div className="space-y-2">
+                {(
+                  [
+                    ["featured", "Featured", "Shown in the featured section"],
+                    ["newArrival", "New arrival", "Shown under New Arrivals"],
+                    ["bestSeller", "Best seller", "Shown under Best Sellers"],
+                  ] as const
+                ).map(([key, label, help]) => (
+                  <div
+                    key={key}
+                    className={`flex items-center justify-between rounded-2xl border px-3 py-2.5 transition ${
+                      form[key] ? "border-amber-200 bg-amber-50/70" : "border-stone-200"
+                    }`}
+                  >
+                    <Label htmlFor={`product-${key}`} className="cursor-pointer font-normal">
+                      <span className="block text-sm font-medium text-stone-800">{label}</span>
+                      <span className="block text-xs text-stone-500">{help}</span>
+                    </Label>
+                    <Switch
+                      id={`product-${key}`}
+                      checked={form[key]}
+                      onCheckedChange={(checked) => setField(key, checked)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </FormSection>
+          </div>
         </form>
-      </FormSheet>
+      </FormModal>
     </div>
   );
 }

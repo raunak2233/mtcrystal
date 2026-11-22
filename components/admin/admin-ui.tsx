@@ -1,7 +1,8 @@
 "use client";
 
 import type React from "react";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { Loader2, Plus, Trash2, X } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -117,6 +118,101 @@ export function FormSheet({
         </div>
       </SheetContent>
     </Sheet>
+  );
+}
+
+/**
+ * Full-screen editor for forms too big for the side sheet. Built on the Radix
+ * primitives directly because the shared DialogContent is a centred card.
+ */
+export function FormModal({
+  open,
+  onOpenChange,
+  title,
+  description,
+  children,
+  actions,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  description: string;
+  children: React.ReactNode;
+  actions: React.ReactNode;
+}) {
+  return (
+    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-stone-950/40 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Content className="fixed inset-0 z-50 flex flex-col bg-stone-50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95">
+          <header className="relative border-b border-purple-100 bg-white">
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-purple-600 via-fuchsia-500 to-pink-500" />
+            <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-4 sm:px-6">
+              <DialogPrimitive.Close
+                className="rounded-full border border-stone-200 p-2 text-stone-500 transition hover:border-purple-200 hover:bg-purple-50 hover:text-purple-700"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </DialogPrimitive.Close>
+              <div className="min-w-0 flex-1">
+                <DialogPrimitive.Title className="truncate text-lg font-bold text-stone-900 sm:text-xl">
+                  {title}
+                </DialogPrimitive.Title>
+                <DialogPrimitive.Description className="hidden truncate text-sm text-stone-500 sm:block">
+                  {description}
+                </DialogPrimitive.Description>
+              </div>
+              <div className="flex items-center gap-2">{actions}</div>
+            </div>
+          </header>
+          <div className="flex-1 overflow-y-auto">
+            <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">{children}</div>
+          </div>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
+  );
+}
+
+const sectionTones = {
+  purple: "bg-purple-100 text-purple-700",
+  pink: "bg-pink-100 text-pink-700",
+  amber: "bg-amber-100 text-amber-700",
+  emerald: "bg-emerald-100 text-emerald-700",
+  sky: "bg-sky-100 text-sky-700",
+  fuchsia: "bg-fuchsia-100 text-fuchsia-700",
+} as const;
+
+/** White card with a tinted icon badge; groups one part of a long form. */
+export function FormSection({
+  icon: Icon,
+  tone,
+  title,
+  hint,
+  aside,
+  children,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  tone: keyof typeof sectionTones;
+  title: string;
+  hint?: string;
+  aside?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
+      <div className="mb-5 flex items-start gap-3">
+        <span className={`rounded-2xl p-2.5 ${sectionTones[tone]}`}>
+          <Icon className="h-5 w-5" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h3 className="font-semibold text-stone-900">{title}</h3>
+          {hint ? <p className="mt-0.5 text-sm text-stone-500">{hint}</p> : null}
+        </div>
+        {aside}
+      </div>
+      {children}
+    </section>
   );
 }
 

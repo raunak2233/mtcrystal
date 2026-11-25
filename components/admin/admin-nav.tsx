@@ -2,6 +2,7 @@
 
 import {
   Boxes,
+  FileText,
   GalleryVerticalEnd,
   LayoutTemplate,
   MessageSquareQuote,
@@ -14,6 +15,7 @@ export type AdminSection =
   | "products"
   | "categories"
   | "banners"
+  | "pages"
   | "testimonials"
   | "settings";
 
@@ -27,6 +29,7 @@ export const ADMIN_SECTIONS: {
   { key: "products", label: "Products", description: "Catalog and stock", icon: Boxes },
   { key: "categories", label: "Categories", description: "Menu structure", icon: GalleryVerticalEnd },
   { key: "banners", label: "Banners", description: "Homepage hero", icon: LayoutTemplate },
+  { key: "pages", label: "Pages", description: "Edit each page's content", icon: FileText },
   { key: "testimonials", label: "Reviews", description: "Customer testimonials", icon: MessageSquareQuote },
   { key: "settings", label: "Settings", description: "Contact and social links", icon: Settings },
 ];

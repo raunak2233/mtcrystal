@@ -7,6 +7,7 @@ import type {
   Banner,
   Category,
   Order,
+  Page,
   Payment,
   Product,
   SiteSettings,
@@ -104,10 +105,18 @@ type BannerRow = RowDataPacket & {
   title: string;
   subtitle: string;
   image: string;
+  mobile_image: string | null;
   cta_text: string;
   cta_link: string;
   secondary_cta_text: string | null;
   secondary_cta_link: string | null;
+};
+
+type PageRow = RowDataPacket & {
+  id: string;
+  title: string;
+  content: string;
+  updated_at: string;
 };
 
 type TestimonialRow = RowDataPacket & {
@@ -369,6 +378,7 @@ function hydrateBanners(rows: BannerRow[]): Banner[] {
     title: row.title,
     subtitle: row.subtitle,
     image: row.image,
+    mobileImage: row.mobile_image || "",
     ctaText: row.cta_text,
     ctaLink: row.cta_link,
     secondaryCtaText: row.secondary_cta_text || "",
@@ -671,13 +681,14 @@ async function insertBanners(connection: PoolConnection, banners: Banner[]) {
   for (const banner of banners) {
     await connection.execute(
       `INSERT INTO banners (
-        id, title, subtitle, image, cta_text, cta_link, secondary_cta_text, secondary_cta_link, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        id, title, subtitle, image, mobile_image, cta_text, cta_link, secondary_cta_text, secondary_cta_link, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         banner.id,
         banner.title || "",
         banner.subtitle || "",
         banner.image,
+        banner.mobileImage || "",
         banner.ctaText || "",
         banner.ctaLink || "/products",
         banner.secondaryCtaText || "",
@@ -1194,6 +1205,45 @@ export async function writeBanners(banners: Banner[]) {
   await withTransaction(async (connection) => {
     await connection.query("DELETE FROM banners");
     await insertBanners(connection, banners);
+  });
+}
+
+function normalizeStoredPage(page: Page): Page {
+  return {
+    id: String(page.id || "").trim(),
+    title: String(page.title || "").trim(),
+    content: String(page.content || ""),
+    updatedAt: String(page.updatedAt || ""),
+  };
+}
+
+/** One content row per page (About, Benefits, Gallery, ...); the admin edits them here. */
+export async function readPages(): Promise<Page[]> {
+  await ensureStoreReady();
+  const rows = await query<PageRow[]>("SELECT * FROM pages ORDER BY id ASC");
+  return rows.map((row) =>
+    normalizeStoredPage({
+      id: row.id,
+      title: row.title,
+      content: row.content,
+      updatedAt: row.updated_at,
+    })
+  );
+}
+
+export async function writePages(pages: Page[]) {
+  await ensureStoreReady();
+  await withTransaction(async (connection) => {
+    await connection.query("DELETE FROM pages");
+    const stamp = toMysqlDateTime(nowIso());
+    for (const page of pages) {
+      await connection.execute("INSERT INTO pages (id, title, content, updated_at) VALUES (?, ?, ?, ?)", [
+        page.id,
+        page.title || "",
+        page.content || "",
+        stamp,
+      ]);
+    }
   });
 }
 

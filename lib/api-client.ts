@@ -3,6 +3,7 @@ import type {
   Banner,
   Category,
   Order,
+  Page,
   Product,
   SessionUser,
   SiteSettings,
@@ -82,6 +83,10 @@ export async function getTestimonials() {
 
 export async function getSettings() {
   return apiGet<{ settings: SiteSettings }>("/api/settings");
+}
+
+export async function getPages() {
+  return apiGet<{ pages: Page[] }>("/api/pages");
 }
 
 export async function getOrders(scope: "visible" | "mine" = "visible") {

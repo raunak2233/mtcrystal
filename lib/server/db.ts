@@ -96,6 +96,12 @@ async function tableRowCount(table: string) {
  * idempotent and safe to run on every boot.
  */
 async function runMigrations() {
+  // Banners used to carry only the desktop artwork; the mobile variant was
+  // added later, so it is nullable.
+  if (!(await columnExists("banners", "mobile_image"))) {
+    await getPool().query("ALTER TABLE banners ADD COLUMN mobile_image TEXT NULL");
+  }
+
   if (!(await columnExists("categories", "parent_id"))) {
     await getPool().query("ALTER TABLE categories ADD COLUMN parent_id VARCHAR(64) NULL");
   }

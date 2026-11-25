@@ -87,11 +87,19 @@ CREATE TABLE IF NOT EXISTS banners (
   title VARCHAR(255) NOT NULL,
   subtitle TEXT NOT NULL,
   image TEXT NOT NULL,
+  mobile_image TEXT NULL,
   cta_text VARCHAR(255) NOT NULL,
   cta_link VARCHAR(255) NOT NULL,
   secondary_cta_text VARCHAR(255) NULL,
   secondary_cta_link VARCHAR(255) NULL,
   created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS pages (
+  id VARCHAR(64) PRIMARY KEY,
+  title TEXT NOT NULL,
+  content LONGTEXT NOT NULL,
   updated_at DATETIME NOT NULL
 );
 

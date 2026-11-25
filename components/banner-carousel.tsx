@@ -13,6 +13,17 @@ const AUTOPLAY_MS = 6000;
 export function BannerCarousel({ banners }: { banners: Banner[] }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [isNarrowScreen, setIsNarrowScreen] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia("(max-width: 639px)").matches : false
+  );
+
+  useEffect(() => {
+    const mql = window.matchMedia("(max-width: 639px)");
+    const sync = () => setIsNarrowScreen(mql.matches);
+    sync();
+    mql.addEventListener("change", sync);
+    return () => mql.removeEventListener("change", sync);
+  }, []);
 
   const goTo = useCallback(
     (index: number) => {
@@ -53,6 +64,8 @@ export function BannerCarousel({ banners }: { banners: Banner[] }) {
     >
       {banners.map((banner, index) => {
         const active = index === currentSlide;
+        const bannerImage =
+          isNarrowScreen && banner.mobileImage ? banner.mobileImage : banner.image;
         // Copy is admin-editable and often baked into the artwork instead, so the
         // overlay only renders for the fields that are actually filled in.
         const hasCopy = Boolean(banner.title || banner.subtitle || banner.ctaText);
@@ -69,7 +82,7 @@ export function BannerCarousel({ banners }: { banners: Banner[] }) {
             }`}
           >
             <Image
-              src={banner.image}
+              src={bannerImage}
               alt={banner.title || `Homepage banner ${index + 1}`}
               fill
               className="object-cover"

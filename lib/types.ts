@@ -56,10 +56,19 @@ export interface Banner {
   title: string;
   subtitle: string;
   image: string;
+  /** Mobile-only variant; shown instead of `image` on narrow screens, when set. */
+  mobileImage?: string;
   ctaText: string;
   ctaLink: string;
   secondaryCtaText?: string;
   secondaryCtaLink?: string;
+}
+
+export interface Page {
+  id: string;
+  title: string;
+  content: string;
+  updatedAt: string;
 }
 
 export interface Testimonial {

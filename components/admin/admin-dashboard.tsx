@@ -11,6 +11,7 @@ import { AdminSkeleton } from "@/components/admin/admin-skeleton";
 import { BannerManager } from "@/components/admin/banner-manager";
 import { CategoryManager } from "@/components/admin/category-manager";
 import { OrderManager } from "@/components/admin/order-manager";
+import { PageManager } from "@/components/admin/page-manager";
 import { ProductManager } from "@/components/admin/product-manager";
 import { SettingsManager } from "@/components/admin/settings-manager";
 import { TestimonialManager } from "@/components/admin/testimonial-manager";
@@ -20,6 +21,7 @@ import {
   getCategories,
   getCurrentUser,
   getOrders,
+  getPages,
   getProducts,
   getSettings,
   getTestimonials,
@@ -29,6 +31,7 @@ import type {
   Banner,
   Category,
   Order,
+  Page,
   Product,
   SessionUser,
   SiteSettings,
@@ -44,6 +47,7 @@ export function AdminDashboard() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
+  const [pages, setPages] = useState<Page[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
@@ -56,6 +60,7 @@ export function AdminDashboard() {
       productResponse,
       categoryResponse,
       bannerResponse,
+      pageResponse,
       orderResponse,
       testimonialResponse,
       settingsResponse,
@@ -63,6 +68,7 @@ export function AdminDashboard() {
       getProducts(),
       getCategories(),
       getBanners(),
+      getPages(),
       getOrders("visible"),
       getTestimonials(),
       getSettings(),
@@ -71,6 +77,7 @@ export function AdminDashboard() {
     setProducts(productResponse.products);
     setCategories(categoryResponse.categories);
     setBanners(bannerResponse.banners);
+    setPages(pageResponse.pages);
     setOrders(orderResponse.orders);
     setTestimonials(testimonialResponse.testimonials);
     setSettings(settingsResponse.settings);
@@ -220,6 +227,10 @@ export function AdminDashboard() {
 
             {activeSection === "banners" ? (
               <BannerManager banners={banners} onRefresh={refresh} />
+            ) : null}
+
+            {activeSection === "pages" ? (
+              <PageManager pages={pages} onRefresh={refresh} />
             ) : null}
 
             {activeSection === "testimonials" ? (

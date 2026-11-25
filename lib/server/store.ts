@@ -115,7 +115,8 @@ type BannerRow = RowDataPacket & {
 type PageRow = RowDataPacket & {
   id: string;
   title: string;
-  content: string;
+  description: string;
+  body: string;
   updated_at: string;
 };
 
@@ -1212,12 +1213,13 @@ function normalizeStoredPage(page: Page): Page {
   return {
     id: String(page.id || "").trim(),
     title: String(page.title || "").trim(),
-    content: String(page.content || ""),
+    description: String(page.description || ""),
+    body: String(page.body || ""),
     updatedAt: String(page.updatedAt || ""),
   };
 }
 
-/** One content row per page (About, Benefits, Gallery, ...); the admin edits them here. */
+/** One row per page (About, Benefits, Gallery, ...); the admin edits the text here. */
 export async function readPages(): Promise<Page[]> {
   await ensureStoreReady();
   const rows = await query<PageRow[]>("SELECT * FROM pages ORDER BY id ASC");
@@ -1225,7 +1227,8 @@ export async function readPages(): Promise<Page[]> {
     normalizeStoredPage({
       id: row.id,
       title: row.title,
-      content: row.content,
+      description: row.description,
+      body: row.body,
       updatedAt: row.updated_at,
     })
   );
@@ -1237,10 +1240,11 @@ export async function writePages(pages: Page[]) {
     await connection.query("DELETE FROM pages");
     const stamp = toMysqlDateTime(nowIso());
     for (const page of pages) {
-      await connection.execute("INSERT INTO pages (id, title, content, updated_at) VALUES (?, ?, ?, ?)", [
+      await connection.execute("INSERT INTO pages (id, title, description, body, updated_at) VALUES (?, ?, ?, ?, ?)", [
         page.id,
         page.title || "",
-        page.content || "",
+        page.description || "",
+        page.body || "",
         stamp,
       ]);
     }

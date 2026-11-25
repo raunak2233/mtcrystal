@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { FileText } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,13 +15,9 @@ import {
 import { apiSend } from "@/lib/api-client";
 import type { Page } from "@/lib/types";
 
-const emptyForm = { id: "", title: "", content: "" };
+const emptyForm = { id: "", title: "", description: "", body: "" };
 
-function stripHtml(value: string) {
-  return value.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-}
-
-/** One content row per page — About, Benefits, Gallery and so on — edited here. */
+/** One row per page — About, Benefits, Gallery and so on — edited here, in plain text. */
 export function PageManager({
   pages,
   onRefresh,
@@ -37,7 +32,12 @@ export function PageManager({
   const openCreate = () => setForm({ ...emptyForm });
 
   const openEdit = (page: Page) => {
-    setForm({ id: page.id, title: page.title, content: page.content });
+    setForm({
+      id: page.id,
+      title: page.title,
+      description: page.description,
+      body: page.body,
+    });
     setFormOpen(true);
   };
 
@@ -53,7 +53,8 @@ export function PageManager({
     try {
       await apiSend(`/api/pages/${form.id}`, "PUT", {
         title: form.title,
-        content: form.content,
+        description: form.description,
+        body: form.body,
       });
       const isExisting = pages.some((page) => page.id === form.id);
       toast.success(isExisting ? "Page updated" : "Page created");
@@ -71,7 +72,7 @@ export function PageManager({
     <div className="space-y-6">
       <SectionHeader
         title="Pages"
-        description="Edit each page's content — one page at a time."
+        description="Edit each page's text — one page at a time. Enter plain text, no HTML."
         actionLabel="New Page"
         onAction={openCreate}
       />
@@ -84,9 +85,9 @@ export function PageManager({
                 <div className="min-w-0">
                   <h3 className="font-semibold">{page.title || page.id}</h3>
                   <p className="mt-0.5 break-all text-xs text-stone-500">/page/{page.id}</p>
-                  {page.content ? (
+                  {page.description ? (
                     <p className="mt-2 line-clamp-2 text-sm text-stone-500">
-                      {stripHtml(page.content)}
+                      {page.description}
                     </p>
                   ) : null}
                 </div>
@@ -110,7 +111,7 @@ export function PageManager({
         open={formOpen}
         onOpenChange={setFormOpen}
         title={form.id ? `Edit page ${form.id}` : "New page"}
-        description="HTML is supported in the content — headings, links and paragraphs."
+        description="Enter text only — no HTML needed; paragraphs appear as written."
         footer={
           <>
             <Button type="button" variant="outline" onClick={() => setFormOpen(false)}>
@@ -147,22 +148,38 @@ export function PageManager({
             <Input
               id="page-title"
               value={form.title}
-              onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, title: event.target.value }))
+              }
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="page-content">Content</Label>
+            <Label htmlFor="page-description">Short description (optional)</Label>
             <Textarea
-              id="page-content"
-              rows={12}
-              value={form.content}
+              id="page-description"
+              rows={2}
+              value={form.description}
               onChange={(event) =>
-                setForm((current) => ({ ...current, content: event.target.value }))
+                setForm((current) => ({ ...current, description: event.target.value }))
               }
+              placeholder="One line shown under the title."
             />
-            <p className="text-xs text-stone-500">Shown when this page is opened.</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="page-body">Page text</Label>
+            <Textarea
+              id="page-body"
+              rows={12}
+              value={form.body}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, body: event.target.value }))
+              }
+              placeholder="The main text of the page. Write it as you want it to read."
+            />
+            <p className="text-xs text-stone-500">Plain text — blank lines separate paragraphs.</p>
           </div>
         </form>
       </FormSheet>

@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import benefits from "@/data/benefits.json";
+import { StoredPage } from "@/components/stored-page";
+import { readPages } from "@/lib/server/store";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata = buildPageMetadata({
@@ -13,7 +15,18 @@ export const metadata = buildPageMetadata({
   path: "/benefits",
 });
 
-export default function BenefitsPage() {
+export default async function BenefitsPage() {
+  const pages = await readPages();
+  const stored = pages.find((page) => page.id === "benefits");
+
+  if (stored) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <StoredPage page={stored} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}

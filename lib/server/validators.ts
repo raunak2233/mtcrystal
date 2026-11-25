@@ -174,13 +174,15 @@ export function normalizePage(input: Partial<Page>): Page {
   return {
     id: input.id?.trim() || "",
     title: input.title?.trim() || "",
-    content: input.content || "",
+    description: input.description?.trim() || "",
+    body: input.body || "",
     updatedAt: "",
   };
 }
 
 export function validatePage(page: Page) {
   if (!page.id) return "Page id is required";
+  if (!page.title) return "Page title is required";
   return null;
 }
 

@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Heart, Shield, Sparkles, Star, Users, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { StoredPage } from "@/components/stored-page";
+import { readPages } from "@/lib/server/store";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata = buildPageMetadata({
@@ -12,7 +14,18 @@ export const metadata = buildPageMetadata({
   path: "/about",
 });
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const pages = await readPages();
+  const about = pages.find((page) => page.id === "about");
+
+  if (about) {
+    return (
+      <div className="flex flex-col min-h-screen bg-gray-50">
+        <StoredPage page={about} />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       {/* Hero Section */}

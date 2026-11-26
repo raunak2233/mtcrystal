@@ -1217,17 +1217,21 @@ export async function readTextOverrides(): Promise<Record<string, string>> {
 
 export async function writeTextOverrides(texts: Record<string, string>) {
   await ensureStoreReady();
-  const entries = Object.entries(texts).filter(([key]) => key.trim());
+  // Only keep fields that actually differ from the shipped defaults, so a save
+  // writes a handful of rows instead of the whole content set.
+  const entries = Object.entries(texts).filter(
+    ([key, value]) => key.trim() && value !== CONTENT_DEFAULTS[key]
+  );
   const stamp = toMysqlDateTime(nowIso());
 
   await withTransaction(async (connection) => {
     await connection.query("DELETE FROM site_texts");
-    for (const [key, value] of entries) {
-      await connection.execute(
-        "INSERT INTO site_texts (`key`, value, updated_at) VALUES (?, ?, ?)",
-        [key, value ?? "", stamp]
-      );
-    }
+    await batchInsert(
+      connection,
+      "INSERT INTO site_texts (`key`, value, updated_at)",
+      entries.map(([key, value]) => [key, value ?? "", stamp]),
+      3
+    );
   });
 }
 

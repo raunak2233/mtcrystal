@@ -9,7 +9,7 @@ import gallery from "@/data/gallery.json";
 
 type GalleryItem = (typeof gallery)[number];
 
-export function GalleryClient() {
+export function GalleryClient({ title, subtitle }: { title: string; subtitle: string }) {
   const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null);
   const [filter, setFilter] = useState("All");
 
@@ -22,9 +22,9 @@ export function GalleryClient() {
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-16">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-5xl font-bold mb-4">Our Gallery</h1>
+          <h1 className="text-5xl font-bold mb-4">{title}</h1>
           <p className="text-xl text-purple-100 max-w-3xl mx-auto">
-            Explore our beautiful collection of crystal bracelets and see the craftsmanship that goes into each piece.
+            {subtitle}
           </p>
         </div>
       </section>

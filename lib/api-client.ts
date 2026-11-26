@@ -3,7 +3,6 @@ import type {
   Banner,
   Category,
   Order,
-  Page,
   Product,
   SessionUser,
   SiteSettings,
@@ -85,8 +84,12 @@ export async function getSettings() {
   return apiGet<{ settings: SiteSettings }>("/api/settings");
 }
 
-export async function getPages() {
-  return apiGet<{ pages: Page[] }>("/api/pages");
+export async function getSiteTexts() {
+  return apiGet<{ texts: Record<string, string> }>("/api/site-texts");
+}
+
+export async function saveSiteTexts(texts: Record<string, string>) {
+  return apiSend<{ texts: Record<string, string> }>("/api/site-texts", "PUT", { texts });
 }
 
 export async function getOrders(scope: "visible" | "mine" = "visible") {

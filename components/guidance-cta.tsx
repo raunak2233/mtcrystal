@@ -1,6 +1,7 @@
 import { ArrowRight, Mail, MessageCircle, Phone } from "lucide-react";
 
 import { ButtonLink } from "@/components/button-link";
+import { readContent } from "@/lib/server/store";
 import type { SiteSettings } from "@/lib/types";
 
 /**
@@ -8,7 +9,8 @@ import type { SiteSettings } from "@/lib/types";
  * only rendered when it has actually been filled in, so the panel never shows a
  * dead link.
  */
-export function GuidanceCta({ settings }: { settings: SiteSettings }) {
+export async function GuidanceCta({ settings }: { settings: SiteSettings }) {
+  const content = await readContent();
   const phone = settings.phonePrimary?.trim();
   const email = settings.contactEmail?.trim();
   const whatsapp = settings.whatsappUrl?.trim();
@@ -29,19 +31,18 @@ export function GuidanceCta({ settings }: { settings: SiteSettings }) {
           <div className="relative grid items-center gap-8 lg:grid-cols-[1.4fr,1fr]">
             <div>
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-purple-100">
-                Not sure where to start?
+                {content["shared.guidance.eyebrow"]}
               </p>
               <h2 className="text-balance text-3xl font-bold sm:text-4xl">
-                Tell us what you need, we&apos;ll pick the crystal
+                {content["shared.guidance.title"]}
               </h2>
               <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-purple-50">
-                Share what you are working through - sleep, focus, anxiety, money blocks or a fresh
-                start - and we will suggest a bracelet or a combination that fits. No pressure to buy.
+                {content["shared.guidance.subtitle"]}
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">
                 <ButtonLink href="/contact" size="lg" variant="secondary" className="font-semibold">
-                  Get a recommendation
+                  {content["shared.guidance.primaryButton"]}
                   <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                 </ButtonLink>
                 <ButtonLink
@@ -50,7 +51,7 @@ export function GuidanceCta({ settings }: { settings: SiteSettings }) {
                   variant="outline"
                   className="border-white/60 bg-transparent font-semibold text-white hover:bg-white/10 hover:text-white"
                 >
-                  Browse the collection
+                  {content["shared.guidance.secondaryButton"]}
                 </ButtonLink>
               </div>
             </div>
@@ -65,8 +66,12 @@ export function GuidanceCta({ settings }: { settings: SiteSettings }) {
                 >
                   <MessageCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
                   <span className="min-w-0">
-                    <span className="block text-sm font-semibold">Chat on WhatsApp</span>
-                    <span className="block text-xs text-purple-100">Fastest way to reach us</span>
+                    <span className="block text-sm font-semibold">
+                      {content["shared.guidance.whatsappTitle"]}
+                    </span>
+                    <span className="block text-xs text-purple-100">
+                      {content["shared.guidance.whatsappNote"]}
+                    </span>
                   </span>
                 </a>
               ) : null}
@@ -79,7 +84,9 @@ export function GuidanceCta({ settings }: { settings: SiteSettings }) {
                   <Phone className="h-5 w-5 shrink-0" aria-hidden="true" />
                   <span className="min-w-0">
                     <span className="block text-sm font-semibold">{phone}</span>
-                    <span className="block text-xs text-purple-100">Mon-Sat, 10am - 6pm IST</span>
+                    <span className="block text-xs text-purple-100">
+                      {content["shared.guidance.phoneNote"]}
+                    </span>
                   </span>
                 </a>
               ) : null}
@@ -92,7 +99,9 @@ export function GuidanceCta({ settings }: { settings: SiteSettings }) {
                   <Mail className="h-5 w-5 shrink-0" aria-hidden="true" />
                   <span className="min-w-0">
                     <span className="block truncate text-sm font-semibold">{email}</span>
-                    <span className="block text-xs text-purple-100">We reply within a day</span>
+                    <span className="block text-xs text-purple-100">
+                      {content["shared.guidance.emailNote"]}
+                    </span>
                   </span>
                 </a>
               ) : null}

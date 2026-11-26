@@ -4,7 +4,6 @@ import type {
   Category,
   OrderAddress,
   OrderItem,
-  Page,
   Product,
   SiteSettings,
   Testimonial,
@@ -167,22 +166,6 @@ export function validateTestimonial(testimonial: Testimonial) {
   if (!testimonial.name) return "Reviewer name is required";
   if (!testimonial.message) return "Review text is required";
   if (testimonial.rating < 1 || testimonial.rating > 5) return "Rating must be between 1 and 5";
-  return null;
-}
-
-export function normalizePage(input: Partial<Page>): Page {
-  return {
-    id: input.id?.trim() || "",
-    title: input.title?.trim() || "",
-    description: input.description?.trim() || "",
-    body: input.body || "",
-    updatedAt: "",
-  };
-}
-
-export function validatePage(page: Page) {
-  if (!page.id) return "Page id is required";
-  if (!page.title) return "Page title is required";
   return null;
 }
 

@@ -30,17 +30,27 @@ import { getCartCount } from "@/lib/cart";
 import { getCurrentUser } from "@/lib/api-client";
 import type { Category, SessionUser } from "@/lib/types";
 
-const primaryLinks = [
-  { href: "/", label: "Home" },
-  { href: "/products", label: "All Products" },
-  { href: "/gallery", label: "Gallery" },
-  { href: "/benefits", label: "Benefits" },
-  { href: "/testimonials", label: "Testimonials" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
-];
+const primaryLinkHrefs = [
+  { href: "/", key: "header.nav.home" },
+  { href: "/products", key: "header.nav.products" },
+  { href: "/gallery", key: "header.nav.gallery" },
+  { href: "/benefits", key: "header.nav.benefits" },
+  { href: "/testimonials", key: "header.nav.testimonials" },
+  { href: "/about", key: "header.nav.about" },
+  { href: "/contact", key: "header.nav.contact" },
+] as const;
 
-export function EcommerceHeader({ categories }: { categories: Category[] }) {
+export function EcommerceHeader({
+  categories,
+  texts,
+}: {
+  categories: Category[];
+  texts: Record<string, string>;
+}) {
+  const primaryLinks = primaryLinkHrefs.map((link) => ({
+    href: link.href,
+    label: texts[link.key] ?? "",
+  }));
   const router = useRouter();
   const [cartCount, setCartCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -99,10 +109,10 @@ export function EcommerceHeader({ categories }: { categories: Category[] }) {
                 <SheetHeader className="border-b border-stone-200 px-6 pb-5 text-left">
                   <SheetTitle className="flex items-center gap-2 text-xl">
                     <Sparkles className="h-5 w-5 text-purple-600" />
-                    Explore MT Crystals
+                    {texts["header.menu.title"]}
                   </SheetTitle>
                   <SheetDescription>
-                    Browse collections, stories, and your account from one place.
+                    {texts["header.menu.description"]}
                   </SheetDescription>
                 </SheetHeader>
 
@@ -126,7 +136,7 @@ export function EcommerceHeader({ categories }: { categories: Category[] }) {
                         href={user ? "/account" : "/login"}
                         className="flex items-center justify-between rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm font-medium text-stone-700 transition hover:border-purple-200 hover:text-purple-700"
                       >
-                        <span>{user ? "My Account" : "Login / Signup"}</span>
+                        <span>{user ? texts["header.myAccount"] : texts["header.login"]}</span>
                         <span className="text-stone-300">/</span>
                       </Link>
                     </SheetClose>
@@ -136,7 +146,7 @@ export function EcommerceHeader({ categories }: { categories: Category[] }) {
                           href="/admin"
                           className="flex items-center justify-between rounded-2xl border border-purple-200 bg-purple-50 px-4 py-3 text-sm font-medium text-purple-700 transition hover:bg-purple-100"
                         >
-                          <span>Admin Dashboard</span>
+                          <span>{texts["header.adminDashboard"]}</span>
                           <ShieldCheck className="h-4 w-4" />
                         </Link>
                       </SheetClose>
@@ -145,7 +155,7 @@ export function EcommerceHeader({ categories }: { categories: Category[] }) {
 
                   <div className="mt-8">
                     <p className="mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">
-                      Shop By Category
+                      {texts["header.menu.categories"]}
                     </p>
                     <CategoryNavMobile categories={categories} />
                   </div>
@@ -154,7 +164,10 @@ export function EcommerceHeader({ categories }: { categories: Category[] }) {
             </Sheet>
 
             <Link href="/" className="flex-shrink-0">
-              <Logo />
+              <Logo
+                name={texts["header.brand.name"]}
+                tagline={texts["header.brand.tagline"]}
+              />
             </Link>
           </div>
 
@@ -162,7 +175,7 @@ export function EcommerceHeader({ categories }: { categories: Category[] }) {
             <div className="relative w-full">
               <Input
                 type="text"
-                placeholder="Search for crystals, bracelets..."
+                placeholder={texts["header.search.desktop"]}
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 className="h-11 rounded-full border-stone-200 bg-stone-50 pr-10"
@@ -183,7 +196,7 @@ export function EcommerceHeader({ categories }: { categories: Category[] }) {
               <Button variant="ghost" className="gap-2 px-3">
                 <User className="h-5 w-5" />
                 <span className="max-w-28 truncate text-sm">
-                  {user ? user.name.split(" ")[0] : "Account"}
+                  {user ? user.name.split(" ")[0] : texts["header.account"]}
                 </span>
               </Button>
             </Link>
@@ -192,7 +205,7 @@ export function EcommerceHeader({ categories }: { categories: Category[] }) {
               <Link href="/admin" className="hidden lg:block">
                 <Button variant="ghost" className="gap-2 px-3 text-purple-700">
                   <ShieldCheck className="h-5 w-5" />
-                  Admin
+                  {texts["header.admin"]}
                 </Button>
               </Link>
             ) : null}
@@ -214,7 +227,7 @@ export function EcommerceHeader({ categories }: { categories: Category[] }) {
           <div className="relative w-full">
             <Input
               type="text"
-              placeholder="Search crystals..."
+              placeholder={texts["header.search.mobile"]}
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               className="w-full rounded-full border-stone-200 bg-stone-50 pr-10"

@@ -64,16 +64,6 @@ export interface Banner {
   secondaryCtaLink?: string;
 }
 
-export interface Page {
-  id: string;
-  title: string;
-  /** Short text shown at the top of the page. */
-  description: string;
-  /** Main page text. Plain text — the admin enters text, it is shown as paragraphs. */
-  body: string;
-  updatedAt: string;
-}
-
 export interface Testimonial {
   id: string;
   name: string;

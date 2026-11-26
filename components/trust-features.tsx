@@ -1,44 +1,27 @@
 import { Gem, HeartHandshake, RefreshCcw, ShieldCheck, Sparkles, Truck } from "lucide-react";
 
+import { readContent } from "@/lib/server/store";
+
 const FEATURES = [
-  {
-    icon: Gem,
-    title: "100% Natural Stones",
-    description: "Authentic gemstones, never dyed glass or plastic lookalikes.",
-  },
-  {
-    icon: Sparkles,
-    title: "Cleansed & Energised",
-    description: "Every bracelet is charged before it is packed and shipped.",
-  },
-  {
-    icon: Truck,
-    title: "Pan-India Delivery",
-    description: "Free shipping above Rs. 999, tracked door-to-door.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Secure Payments",
-    description: "UPI, cards, net banking and COD via encrypted checkout.",
-  },
-  {
-    icon: RefreshCcw,
-    title: "Easy Replacement",
-    description: "Damaged in transit? We replace it within 48 hours.",
-  },
-  {
-    icon: HeartHandshake,
-    title: "Guidance Included",
-    description: "Not sure which crystal? Talk to us before you buy.",
-  },
+  { icon: Gem },
+  { icon: Sparkles },
+  { icon: Truck },
+  { icon: ShieldCheck },
+  { icon: RefreshCcw },
+  { icon: HeartHandshake },
 ];
 
 /**
  * Trust strip. `compact` renders the four headline promises in a single row for
  * use directly under a hero; the default shows all six as cards.
  */
-export function TrustFeatures({ compact = false }: { compact?: boolean }) {
-  const items = compact ? FEATURES.slice(0, 4) : FEATURES;
+export async function TrustFeatures({ compact = false }: { compact?: boolean }) {
+  const content = await readContent();
+  const items = (compact ? FEATURES.slice(0, 4) : FEATURES).map((feature, index) => ({
+    ...feature,
+    title: content[`shared.trust.${index + 1}.title`] ?? "",
+    description: content[`shared.trust.${index + 1}.description`] ?? "",
+  }));
 
   if (compact) {
     return (

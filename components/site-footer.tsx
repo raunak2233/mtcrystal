@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 import { Logo } from "@/components/logo";
-import { readCategories, readSettings } from "@/lib/server/store";
+import { readCategories, readContent, readSettings } from "@/lib/server/store";
 import { categoryHref, getTopLevelCategories } from "@/lib/categories";
 import { formatSettingsAddress, getSocialLinks } from "@/lib/site-settings";
 import { SERVICE_CITIES } from "@/lib/content";
@@ -25,22 +25,26 @@ const socialIcons: Record<string, typeof Facebook> = {
 };
 
 const QUICK_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/products", label: "All Products" },
-  { href: "/benefits", label: "Crystal Benefits" },
-  { href: "/gallery", label: "Gallery" },
-  { href: "/about", label: "About Us" },
+  { href: "/", key: "footer.link.home" },
+  { href: "/products", key: "footer.link.products" },
+  { href: "/benefits", key: "footer.link.benefits" },
+  { href: "/gallery", key: "footer.link.gallery" },
+  { href: "/about", key: "footer.link.about" },
 ];
 
 const CARE_LINKS = [
-  { href: "/contact", label: "Contact Us" },
-  { href: "/testimonials", label: "Customer Reviews" },
-  { href: "/account", label: "My Account" },
-  { href: "/cart", label: "Shopping Cart" },
+  { href: "/contact", key: "footer.link.contact" },
+  { href: "/testimonials", key: "footer.link.testimonials" },
+  { href: "/account", key: "footer.link.account" },
+  { href: "/cart", key: "footer.link.cart" },
 ];
 
 export async function SiteFooter() {
-  const [settings, categories] = await Promise.all([readSettings(), readCategories()]);
+  const [settings, categories, content] = await Promise.all([
+    readSettings(),
+    readCategories(),
+    readContent(),
+  ]);
   const addressLines = formatSettingsAddress(settings);
   const socialLinks = getSocialLinks(settings);
   // Top-level groups only: the footer is for orientation, not the full tree.
@@ -52,7 +56,10 @@ export async function SiteFooter() {
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-5">
           <div className="flex flex-col gap-4 lg:col-span-2">
             <Link href="/" className="flex items-center space-x-2">
-              <Logo />
+              <Logo
+                name={content["header.brand.name"]}
+                tagline={content["header.brand.tagline"]}
+              />
             </Link>
             <p className="max-w-sm text-sm leading-relaxed text-gray-300">
               {settings.footerAbout}
@@ -107,34 +114,34 @@ export async function SiteFooter() {
           </div>
 
           <nav aria-label="Quick links" className="grid grid-cols-1 content-start gap-3">
-            <h2 className="mb-1 text-base font-bold">Quick Links</h2>
+            <h2 className="mb-1 text-base font-bold">{content["footer.quickLinks"]}</h2>
             {QUICK_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className="text-sm text-gray-300 transition-colors hover:text-purple-400"
               >
-                {link.label}
+                {content[link.key]}
               </Link>
             ))}
           </nav>
 
           <nav aria-label="Customer care" className="grid grid-cols-1 content-start gap-3">
-            <h2 className="mb-1 text-base font-bold">Customer Care</h2>
+            <h2 className="mb-1 text-base font-bold">{content["footer.customerCare"]}</h2>
             {CARE_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className="text-sm text-gray-300 transition-colors hover:text-purple-400"
               >
-                {link.label}
+                {content[link.key]}
               </Link>
             ))}
           </nav>
 
           {topCategories.length ? (
             <nav aria-label="Shop by category" className="grid grid-cols-1 content-start gap-3">
-              <h2 className="mb-1 text-base font-bold">Shop By Intention</h2>
+              <h2 className="mb-1 text-base font-bold">{content["footer.intentions"]}</h2>
               {topCategories.map((category) => (
                 <Link
                   key={category.id}
@@ -150,17 +157,16 @@ export async function SiteFooter() {
 
         <div className="mt-12 border-t border-gray-800 pt-8">
           <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-gray-400">
-            Crystal bracelet delivery across India
+            {content["footer.deliveryHeading"]}
           </h2>
           <p className="text-sm leading-relaxed text-gray-400">
-            {SERVICE_CITIES.map((city) => city.name).join(" · ")} and every other serviceable PIN
-            code in India.
+            {SERVICE_CITIES.map((city) => city.name).join(" · ")} {content["footer.deliveryNote"]}
           </p>
         </div>
 
         <div className="mt-8 flex flex-col items-center gap-2 border-t border-gray-800 pt-8 text-center">
           <p className="text-sm text-gray-400">
-            © {new Date().getFullYear()} MT Crystals - Miracle Touch Crystals. All rights reserved.
+            © {new Date().getFullYear()} {content["footer.copyright"]}
           </p>
           <p className="text-xs text-gray-500">{settings.brandTagline}</p>
         </div>

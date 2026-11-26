@@ -3,6 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 
 import { LinkPendingOverlay } from "@/components/link-pending";
 import { SectionHeading } from "@/components/section-heading";
+import { readContent } from "@/lib/server/store";
 import { buildCategoryTree, categoryHref, productMatchesSlugs } from "@/lib/categories";
 import type { Category, Product } from "@/lib/types";
 
@@ -19,7 +20,7 @@ function sceneImage(product: Product) {
  * group so the section stays visual without needing separate category artwork
  * that an admin would have to maintain.
  */
-export function CategoryShowcase({
+export async function CategoryShowcase({
   categories,
   products,
   limit = 8,
@@ -28,6 +29,7 @@ export function CategoryShowcase({
   products: Product[];
   limit?: number;
 }) {
+  const content = await readContent();
   const fullTree = buildCategoryTree(categories);
   // "Shop by intention" means the Intention group's children when that group
   // exists; otherwise fall back to the top-level groups.
@@ -106,11 +108,11 @@ export function CategoryShowcase({
     <section className="bg-white py-16 sm:py-20">
       <div className="container mx-auto px-4">
         <SectionHeading
-          eyebrow="Shop By Intention"
-          title="Find the crystal for what you need right now"
-          subtitle="Calm, courage, love, protection or abundance - start with the feeling you want more of and we will point you to the stone."
+          eyebrow={content["home.showcase.eyebrow"]}
+          title={content["home.showcase.title"]}
+          subtitle={content["home.showcase.subtitle"]}
           align="left"
-          action={{ href: "/products", label: "Browse everything" }}
+          action={{ href: "/products", label: content["home.showcase.action"] }}
         />
 
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">

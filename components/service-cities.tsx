@@ -2,33 +2,37 @@ import Link from "next/link";
 import { MapPin, PackageCheck, Plane, Truck } from "lucide-react";
 
 import { SectionHeading } from "@/components/section-heading";
+import { readContent } from "@/lib/server/store";
 import { SERVICE_CITIES } from "@/lib/content";
 
-const HIGHLIGHTS = [
-  { icon: PackageCheck, label: "Dispatched in 24-48 hrs", detail: "Packed and shipped on working days" },
-  { icon: Truck, label: "Free above Rs. 999", detail: "Tracked courier, door delivery" },
-  { icon: Plane, label: "Every serviceable PIN code", detail: "Metros, tier-2 towns and beyond" },
-];
+const HIGHLIGHTS = [PackageCheck, Truck, Plane];
 
 /**
  * Delivery coverage band. Doubles as local-SEO surface area: the city names give
  * "crystal bracelet delivery in <city>" queries something real to match against.
  */
-export function ServiceCities() {
+export async function ServiceCities() {
+  const content = await readContent();
+  const highlights = HIGHLIGHTS.map((icon, index) => ({
+    icon,
+    label: content[`shared.cities.highlight${index + 1}.label`] ?? "",
+    detail: content[`shared.cities.highlight${index + 1}.detail`] ?? "",
+  }));
+
   return (
     <section className="bg-brand-wash bg-white py-16 sm:py-20" aria-labelledby="service-cities-title">
       <div className="container mx-auto px-4">
         <SectionHeading
-          eyebrow="Delivering Nationwide"
-          title="We ship crystals across India"
-          subtitle="From Delhi NCR to Chennai, your bracelet is packed with care, cleansed before dispatch and tracked all the way to your door."
+          eyebrow={content["shared.cities.eyebrow"]}
+          title={content["shared.cities.title"]}
+          subtitle={content["shared.cities.subtitle"]}
         />
         <h2 id="service-cities-title" className="sr-only">
           Cities we deliver crystal bracelets to
         </h2>
 
         <div className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {HIGHLIGHTS.map(({ icon: Icon, label, detail }) => (
+          {highlights.map(({ icon: Icon, label, detail }) => (
             <div
               key={label}
               className="flex items-center gap-3 rounded-2xl border border-purple-100 bg-white/80 p-4 shadow-sm backdrop-blur"
@@ -64,9 +68,9 @@ export function ServiceCities() {
         </ul>
 
         <p className="mt-8 text-center text-sm text-gray-600">
-          Don&apos;t see your city? We deliver to every serviceable PIN code in India.{" "}
+          {content["shared.cities.note"]}{" "}
           <Link href="/contact" className="font-semibold text-purple-700 underline-offset-4 hover:underline">
-            Check your pincode with us
+            {content["shared.cities.link"]}
           </Link>
           .
         </p>

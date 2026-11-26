@@ -1,13 +1,14 @@
 import crypto from "crypto";
 import { promises as fs } from "fs";
 import path from "path";
+import { cache } from "react";
 import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 import { ensureDatabaseSetup, query, withTransaction } from "@/lib/server/db";
+import { CONTENT_DEFAULTS } from "@/lib/page-content";
 import type {
   Banner,
   Category,
   Order,
-  Page,
   Payment,
   Product,
   SiteSettings,
@@ -112,11 +113,9 @@ type BannerRow = RowDataPacket & {
   secondary_cta_link: string | null;
 };
 
-type PageRow = RowDataPacket & {
-  id: string;
-  title: string;
-  description: string;
-  body: string;
+type SiteTextRow = RowDataPacket & {
+  key: string;
+  value: string;
   updated_at: string;
 };
 
@@ -1209,47 +1208,37 @@ export async function writeBanners(banners: Banner[]) {
   });
 }
 
-function normalizeStoredPage(page: Page): Page {
-  return {
-    id: String(page.id || "").trim(),
-    title: String(page.title || "").trim(),
-    description: String(page.description || ""),
-    body: String(page.body || ""),
-    updatedAt: String(page.updatedAt || ""),
-  };
+/** Text the client has changed, keyed by the ids in lib/page-content.ts. */
+export async function readTextOverrides(): Promise<Record<string, string>> {
+  await ensureStoreReady();
+  const rows = await query<SiteTextRow[]>("SELECT `key`, value FROM site_texts");
+  return Object.fromEntries(rows.map((row) => [row.key, row.value]));
 }
 
-/** One row per page (About, Benefits, Gallery, ...); the admin edits the text here. */
-export async function readPages(): Promise<Page[]> {
+export async function writeTextOverrides(texts: Record<string, string>) {
   await ensureStoreReady();
-  const rows = await query<PageRow[]>("SELECT * FROM pages ORDER BY id ASC");
-  return rows.map((row) =>
-    normalizeStoredPage({
-      id: row.id,
-      title: row.title,
-      description: row.description,
-      body: row.body,
-      updatedAt: row.updated_at,
-    })
-  );
-}
+  const entries = Object.entries(texts).filter(([key]) => key.trim());
+  const stamp = toMysqlDateTime(nowIso());
 
-export async function writePages(pages: Page[]) {
-  await ensureStoreReady();
   await withTransaction(async (connection) => {
-    await connection.query("DELETE FROM pages");
-    const stamp = toMysqlDateTime(nowIso());
-    for (const page of pages) {
-      await connection.execute("INSERT INTO pages (id, title, description, body, updated_at) VALUES (?, ?, ?, ?, ?)", [
-        page.id,
-        page.title || "",
-        page.description || "",
-        page.body || "",
-        stamp,
-      ]);
+    await connection.query("DELETE FROM site_texts");
+    for (const [key, value] of entries) {
+      await connection.execute(
+        "INSERT INTO site_texts (`key`, value, updated_at) VALUES (?, ?, ?)",
+        [key, value ?? "", stamp]
+      );
     }
   });
 }
+
+/**
+ * Defaults merged with whatever the admin has saved. Cached per request so the
+ * many server components on a page share one query.
+ */
+export const readContent = cache(async (): Promise<Record<string, string>> => {
+  const overrides = await readTextOverrides();
+  return { ...CONTENT_DEFAULTS, ...overrides };
+});
 
 export async function readUsers() {
   await ensureStoreReady();

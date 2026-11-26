@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import benefits from "@/data/benefits.json";
-import { StoredPage } from "@/components/stored-page";
-import { readPages } from "@/lib/server/store";
+import { readContent } from "@/lib/server/store";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata = buildPageMetadata({
@@ -16,26 +15,23 @@ export const metadata = buildPageMetadata({
 });
 
 export default async function BenefitsPage() {
-  const pages = await readPages();
-  const stored = pages.find((page) => page.id === "benefits");
+  const content = await readContent();
+  const t = (key: string) => content[key] ?? "";
 
-  if (stored) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <StoredPage page={stored} />
-      </div>
-    );
-  }
+  const cards = benefits.map((benefit) => ({
+    ...benefit,
+    title: t(`benefits.card.${benefit.id}.title`),
+    description: t(`benefits.card.${benefit.id}.description`),
+  }));
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-16">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-5xl font-bold mb-4">Crystal Healing Benefits</h1>
+          <h1 className="text-5xl font-bold mb-4">{t("benefits.hero.title")}</h1>
           <p className="text-xl text-purple-100 max-w-3xl mx-auto">
-            Discover the ancient wisdom and modern science behind crystal healing. 
-            Each crystal carries unique properties to support your well-being.
+            {t("benefits.hero.subtitle")}
           </p>
         </div>
       </section>
@@ -43,7 +39,7 @@ export default async function BenefitsPage() {
       {/* Benefits Grid */}
       <section className="container mx-auto px-4 py-16">
         <div className="space-y-12">
-          {benefits.map((benefit, index) => (
+          {cards.map((benefit, index) => (
             <Card
               key={benefit.id}
               className={`overflow-hidden ${
@@ -85,13 +81,13 @@ export default async function BenefitsPage() {
       {/* CTA Section */}
       <section className="bg-purple-600 text-white py-16">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-4">Ready to Experience the Benefits?</h2>
+          <h2 className="text-4xl font-bold mb-4">{t("benefits.cta.title")}</h2>
           <p className="text-xl text-purple-100 mb-8 max-w-2xl mx-auto">
-            Explore our collection of handcrafted crystal bracelets and find the perfect match for your needs.
+            {t("benefits.cta.subtitle")}
           </p>
           <Link href="/products">
             <Button size="lg" variant="secondary">
-              Shop Crystal Bracelets
+              {t("benefits.cta.button")}
             </Button>
           </Link>
         </div>

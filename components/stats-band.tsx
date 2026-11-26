@@ -1,17 +1,18 @@
-const STATS = [
-  { value: "2017", label: "Crafting since" },
-  { value: "12,000+", label: "Bracelets delivered" },
-  { value: "4.8/5", label: "Average rating" },
-  { value: "100%", label: "Natural gemstones" },
-];
+import { readContent } from "@/lib/server/store";
 
 /** Compact credibility band used between editorial sections. */
-export function StatsBand() {
+export async function StatsBand() {
+  const content = await readContent();
+  const stats = [1, 2, 3, 4].map((index) => ({
+    value: content[`shared.stats.${index}.value`] ?? "",
+    label: content[`shared.stats.${index}.label`] ?? "",
+  }));
+
   return (
     <section className="bg-gradient-to-r from-purple-700 via-purple-600 to-pink-600 py-10 text-white sm:py-12">
       <div className="container mx-auto px-4">
         <dl className="grid grid-cols-2 gap-6 text-center lg:grid-cols-4">
-          {STATS.map((stat) => (
+          {stats.map((stat) => (
             <div key={stat.label} className="space-y-1">
               <dt className="sr-only">{stat.label}</dt>
               <dd>

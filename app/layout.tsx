@@ -7,7 +7,7 @@ import { EcommerceHeader } from "@/components/ecommerce-header"
 import { SiteFooter } from "@/components/site-footer"
 import { InitialLoadOverlay, RouteProgress } from "@/components/route-progress"
 import { JsonLd } from "@/components/json-ld"
-import { readCategories, readSettings } from "@/lib/server/store"
+import { readCategories, readContent, readSettings } from "@/lib/server/store"
 import {
   DEFAULT_KEYWORDS,
   DEFAULT_OG_IMAGE,
@@ -96,7 +96,11 @@ export default async function RootLayout({
 }>) {
   // Read here so the category dropdown is in the first paint instead of popping
   // in after a client-side request.
-  const [categories, settings] = await Promise.all([readCategories(), readSettings()])
+  const [categories, settings, content] = await Promise.all([
+    readCategories(),
+    readSettings(),
+    readContent(),
+  ])
 
   return (
     <html lang="en-IN" suppressHydrationWarning>
@@ -117,7 +121,7 @@ export default async function RootLayout({
           <InitialLoadOverlay />
           <RouteProgress />
           <AppShell
-            header={<EcommerceHeader categories={categories} />}
+            header={<EcommerceHeader categories={categories} texts={content} />}
             footer={<SiteFooter />}
           >
             {children}

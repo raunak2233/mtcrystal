@@ -96,16 +96,6 @@ async function tableRowCount(table: string) {
  * idempotent and safe to run on every boot.
  */
 async function runMigrations() {
-  // Pages were introduced with an HTML-friendly shape; it was replaced by plain
-  // text (title + description + body). Add the new columns when the table
-  // already exists from an earlier boot.
-  if (!(await columnExists("pages", "description"))) {
-    await getPool().query("ALTER TABLE pages ADD COLUMN description TEXT");
-  }
-  if (!(await columnExists("pages", "body"))) {
-    await getPool().query("ALTER TABLE pages ADD COLUMN body LONGTEXT");
-  }
-
   // Banners used to carry only the desktop artwork; the mobile variant was
   // added later, so it is nullable.
   if (!(await columnExists("banners", "mobile_image"))) {

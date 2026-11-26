@@ -96,11 +96,11 @@ CREATE TABLE IF NOT EXISTS banners (
   updated_at DATETIME NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS pages (
-  id VARCHAR(64) PRIMARY KEY,
-  title TEXT NOT NULL,
-  description TEXT NOT NULL,
-  body LONGTEXT NOT NULL,
+-- Only the text the client has changed. Missing keys fall back to the defaults
+-- in lib/page-content.ts, so the storefront always has something to show.
+CREATE TABLE IF NOT EXISTS site_texts (
+  `key` VARCHAR(128) PRIMARY KEY,
+  value LONGTEXT NOT NULL,
   updated_at DATETIME NOT NULL
 );
 

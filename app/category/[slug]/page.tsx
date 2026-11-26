@@ -14,7 +14,8 @@ import {
   ProductSortLinks,
   sortProducts,
 } from "@/components/catalog-controls";
-import { readCategories, readProducts } from "@/lib/server/store";
+import { readCategories, readContent, readProducts } from "@/lib/server/store";
+import { fillTemplate } from "@/lib/page-content";
 import {
   categoryHref,
   findCategoryById,
@@ -76,8 +77,13 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   const { sort } = await searchParams;
   const sortBy = sort || DEFAULT_SORT;
 
-  const [products, categories] = await Promise.all([readProducts(), readCategories()]);
+  const [products, categories, content] = await Promise.all([
+    readProducts(),
+    readCategories(),
+    readContent(),
+  ]);
   const category = findCategoryBySlug(categories, slug);
+  const t = (key: string) => content[key] ?? "";
 
   if (!category) {
     notFound();
@@ -131,10 +137,12 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
 
         <div className="mb-8 rounded-3xl border border-stone-200 bg-brand-wash bg-white p-6 sm:p-10">
           <p className="mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-purple-600">
-            {parent ? `${parent.name} Collection` : "Collection"}
+            {parent
+              ? fillTemplate(t("category.hero.eyebrowParent"), { parent: parent.name })
+              : t("category.hero.eyebrow")}
           </p>
           <h1 className="text-balance text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-            {category.name} Crystal Bracelets
+            {fillTemplate(t("category.hero.title"), { name: category.name })}
           </h1>
           {category.description ? (
             <p className="mt-4 max-w-2xl text-pretty text-base leading-relaxed text-gray-600 sm:text-lg">
@@ -143,15 +151,16 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
           ) : null}
           <p className="mt-4 text-sm text-gray-600">
             <span className="font-semibold text-gray-900">{filteredProducts.length}</span>{" "}
-            {filteredProducts.length === 1 ? "design" : "designs"} available - handcrafted, energised
-            and shipped across India.
+            {fillTemplate(t("category.hero.count"), {
+              designs: filteredProducts.length === 1 ? "design" : "designs",
+            })}
           </p>
         </div>
 
         {children.length ? (
           <div className="mb-8">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">
-              Shop {category.name}
+              {fillTemplate(t("category.children.heading"), { name: category.name })}
             </p>
             <div className="flex flex-wrap gap-2">
               <Button className="bg-purple-600 hover:bg-purple-700">All {category.name}</Button>
@@ -167,7 +176,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
         {!children.length && siblings.length > 1 && parent ? (
           <div className="mb-8">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">
-              More in {parent.name}
+              {fillTemplate(t("category.siblings.heading"), { parent: parent.name })}
             </p>
             <div className="flex flex-wrap gap-2">
               <ButtonLink href={categoryHref(parent.slug)} variant="outline">
@@ -189,7 +198,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
 
         <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <ButtonLink href="/products" variant="outline">
-            Back to All Products
+            {t("category.back")}
           </ButtonLink>
           <ProductSortLinks basePath={categoryHref(category.slug)} currentSort={sortBy} />
         </div>
@@ -203,18 +212,17 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
         ) : (
           <div className="rounded-3xl border border-dashed border-stone-300 bg-white py-16 text-center">
             <p className="mb-2 text-xl font-semibold text-gray-900">
-              No products in {category.name} yet
+              {fillTemplate(t("category.empty.title"), { name: category.name })}
             </p>
             <p className="mx-auto mb-6 max-w-md text-sm text-gray-600">
-              We are restocking this collection. Browse the rest of the catalogue, or tell us what you
-              are looking for and we will let you know when it lands.
+              {t("category.empty.body")}
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <ButtonLink href="/products" className="bg-purple-600 hover:bg-purple-700">
-                View all products
+                {t("category.empty.primary")}
               </ButtonLink>
               <ButtonLink href="/contact" variant="outline">
-                Notify me
+                {t("category.empty.secondary")}
               </ButtonLink>
             </div>
           </div>
@@ -224,9 +232,9 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
       <section className="border-t border-stone-200 bg-white py-16 sm:py-20">
         <div className="container mx-auto px-4">
           <SectionHeading
-            eyebrow="Buy With Confidence"
-            title={`What comes with every ${category.name.toLowerCase()} bracelet`}
-            subtitle="Authenticity, energising, packaging and after-sales support - included, not extra."
+            eyebrow={t("category.trust.eyebrow")}
+            title={fillTemplate(t("category.trust.title"), { name: category.name.toLowerCase() })}
+            subtitle={t("category.trust.subtitle")}
           />
           <TrustFeatures />
         </div>
@@ -236,8 +244,8 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
 
       <FaqSection
         faqs={PRODUCT_FAQS}
-        eyebrow="Before You Order"
-        title="Shipping, payment and sizing"
+        eyebrow={t("category.faq.eyebrow")}
+        title={t("category.faq.title")}
         className="bg-purple-50/60 py-16 sm:py-20"
       />
 

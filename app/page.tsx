@@ -16,9 +16,10 @@ import { ServiceCities } from "@/components/service-cities";
 import { StatsBand } from "@/components/stats-band";
 import { TrustFeatures } from "@/components/trust-features";
 import {
+  readContent,
+  readProducts,
   readBanners,
   readCategories,
-  readProducts,
   readSettings,
   readTestimonials,
 } from "@/lib/server/store";
@@ -32,18 +33,27 @@ export const metadata = buildPageMetadata({
 });
 
 export default async function Home() {
-  const [products, banners, allTestimonials, categories, settings] = await Promise.all([
+  const [products, banners, allTestimonials, categories, settings, content] = await Promise.all([
     readProducts(),
     readBanners(),
     readTestimonials(),
     readCategories(),
     readSettings(),
+    readContent(),
   ]);
+  const t = (key: string) => content[key] ?? "";
 
   const bestSellers = products.filter((product) => product.bestSeller).slice(0, 8);
   const newArrivals = products.filter((product) => product.newArrival).slice(0, 8);
   const featured = allTestimonials.filter((testimonial) => testimonial.featured);
   const testimonials = (featured.length ? featured : allTestimonials).slice(0, 3);
+
+  const storyTiles = [
+    { icon: Heart, title: t("home.story.tile1.title"), copy: t("home.story.tile1.copy") },
+    { icon: Shield, title: t("home.story.tile2.title"), copy: t("home.story.tile2.copy") },
+    { icon: Sparkles, title: t("home.story.tile3.title"), copy: t("home.story.tile3.copy") },
+    { icon: Star, title: t("home.story.tile4.title"), copy: t("home.story.tile4.copy") },
+  ];
 
   return (
     <div className="flex flex-col">
@@ -57,11 +67,11 @@ export default async function Home() {
         <section className="bg-purple-50/60 py-16 sm:py-20">
           <div className="container mx-auto px-4">
             <SectionHeading
-              eyebrow="Loved The Most"
-              title="Best sellers"
-              subtitle="The bracelets our customers keep coming back for, and gifting on."
+              eyebrow={t("home.bestSellers.eyebrow")}
+              title={t("home.bestSellers.title")}
+              subtitle={t("home.bestSellers.subtitle")}
               align="left"
-              action={{ href: "/products?sort=featured", label: "See all best sellers" }}
+              action={{ href: "/products?sort=featured", label: t("home.bestSellers.action") }}
             />
             <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
               {bestSellers.map((product, index) => (
@@ -70,7 +80,7 @@ export default async function Home() {
             </div>
             <div className="mt-10 text-center">
               <ButtonLink href="/products" size="lg" className="bg-purple-600 hover:bg-purple-700">
-                Shop all products
+                {t("home.bestSellers.button")}
                 <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
               </ButtonLink>
             </div>
@@ -86,11 +96,11 @@ export default async function Home() {
         <section className="bg-white py-16 sm:py-20">
           <div className="container mx-auto px-4">
             <SectionHeading
-              eyebrow="Just In"
-              title="New arrivals"
-              subtitle="Fresh designs strung this month, in limited quantities."
+              eyebrow={t("home.newArrivals.eyebrow")}
+              title={t("home.newArrivals.title")}
+              subtitle={t("home.newArrivals.subtitle")}
               align="left"
-              action={{ href: "/products", label: "View the full catalogue" }}
+              action={{ href: "/products", label: t("home.newArrivals.action") }}
             />
             <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
               {newArrivals.map((product) => (
@@ -106,27 +116,19 @@ export default async function Home() {
           <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
             <div className="space-y-6">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-purple-700">
-                Our Story
+                {t("home.story.eyebrow")}
               </p>
               <h2 className="text-balance text-3xl font-bold tracking-tight sm:text-4xl">
-                Handcrafted in India, worn every day
+                {t("home.story.title")}
               </h2>
               <p className="text-pretty text-lg leading-relaxed text-gray-700">
-                Since 2017, MT Crystals has been dedicated to bringing the ancient wisdom of crystal
-                healing to modern life. Each bracelet is handcrafted with genuine gemstones, carefully
-                selected for their unique properties and beauty.
+                {t("home.story.paragraph1")}
               </p>
               <p className="text-pretty text-lg leading-relaxed text-gray-700">
-                We believe in the transformative power of crystals to enhance well-being, promote
-                positive energy, and support your journey toward balance and harmony.
+                {t("home.story.paragraph2")}
               </p>
               <div className="grid grid-cols-2 gap-4 pt-2">
-                {[
-                  { icon: Heart, title: "Handcrafted", copy: "Strung by hand, one at a time" },
-                  { icon: Shield, title: "Authentic", copy: "100% genuine gemstones" },
-                  { icon: Sparkles, title: "Energised", copy: "Cleansed and charged" },
-                  { icon: Star, title: "Quality", copy: "Premium beads and cord" },
-                ].map(({ icon: Icon, title, copy }) => (
+                {storyTiles.map(({ icon: Icon, title, copy }) => (
                   <div key={title} className="flex items-start gap-3">
                     <Icon className="h-6 w-6 flex-shrink-0 text-purple-600" aria-hidden="true" />
                     <div>
@@ -142,7 +144,7 @@ export default async function Home() {
                   variant="outline"
                   className="border-purple-300 bg-white/70 text-purple-700"
                 >
-                  Read our story
+                  {t("home.story.button")}
                   <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                 </ButtonLink>
               </div>
@@ -164,9 +166,9 @@ export default async function Home() {
         <section className="bg-white py-16 sm:py-20">
           <div className="container mx-auto px-4">
             <SectionHeading
-              eyebrow="Real Stories"
-              title="What our customers say"
-              subtitle="Unedited words from people wearing our crystals every day."
+              eyebrow={t("home.testimonials.eyebrow")}
+              title={t("home.testimonials.title")}
+              subtitle={t("home.testimonials.subtitle")}
             />
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {testimonials.map((testimonial) => (
@@ -219,7 +221,7 @@ export default async function Home() {
             </div>
             <div className="mt-10 text-center">
               <ButtonLink href="/testimonials" variant="outline" size="lg">
-                Read more reviews
+                {t("home.testimonials.button")}
               </ButtonLink>
             </div>
           </div>
@@ -231,9 +233,9 @@ export default async function Home() {
       <section className="bg-purple-50/60 py-16 sm:py-20">
         <div className="container mx-auto px-4">
           <SectionHeading
-            eyebrow="The MT Crystals Promise"
-            title="Why thousands of wrists trust us"
-            subtitle="Sourcing, energising, packing and after-sales - the parts that are easy to cut corners on are the parts we don't."
+            eyebrow={t("home.promise.eyebrow")}
+            title={t("home.promise.title")}
+            subtitle={t("home.promise.subtitle")}
           />
           <TrustFeatures />
         </div>
@@ -241,7 +243,9 @@ export default async function Home() {
 
       <FaqSection
         faqs={GENERAL_FAQS}
-        subtitle="Sizing, shipping, authenticity and care - answered."
+        eyebrow={t("home.faq.eyebrow")}
+        title={t("home.faq.title")}
+        subtitle={t("home.faq.subtitle")}
       />
 
       <GuidanceCta settings={settings} />
